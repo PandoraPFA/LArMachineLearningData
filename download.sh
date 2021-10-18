@@ -22,8 +22,15 @@ wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google
 wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1oMDHwtOapNcs8m4H29MpQkiKbFo0rWbT' -O- | sed -En 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1oMDHwtOapNcs8m4H29MpQkiKbFo0rWbT" -O PandoraBdt_PfoCharacterisation_DUNEFD_v03_26_00.xml && rm -rf /tmp/cookies.txt
 wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1RasATFZxy-vwai6mJCmvAew8QQueKbj2' -O- | sed -En 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1RasATFZxy-vwai6mJCmvAew8QQueKbj2" -O PandoraBdt_Vertexing_DUNEFD_v03_26_00.xml && rm -rf /tmp/cookies.txt
 
+### PandoraMVAs
+mkdir -p $MY_TEST_AREA/LArMachineLearningData/PandoraMVAs
+cd $MY_TEST_AREA/LArMachineLearningData/PandoraMVAs
+
 # SBND
-wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1A4za5GX8Y23kcUphMOofTDuOpAdvTOU6' -O- | sed -En 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1A4za5GX8Y23kcUphMOofTDuOpAdvTOU6" -O PandoraBdt_v08_33_00_SBND.xml && rm -rf /tmp/cookies.txt
+wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1lGn-_BCK9TpEdVZUElAAxFJ9ynazcCY7' -O- | sed -En 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1lGn-_BCK9TpEdVZUElAAxFJ9ynazcCY7" -O PandoraBdt_v09_32_00_SBND.xml && rm -rf /tmp/cookies.txt
+
+
+
 
 ### PandoraNetworkData
 mkdir -p $MY_TEST_AREA/LArMachineLearningData/PandoraNetworkData
