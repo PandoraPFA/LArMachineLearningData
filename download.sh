@@ -6,6 +6,18 @@ function download() {
 # You want the FILEID
 # Note: For some reason the above function doesn't work for the files, so you need to set the two &id=FILEID instances in the link
 
+if [ -z $MY_TEST_AREA ]
+then
+  echo "MY_TEST_AREA is not set, can't download the files"
+  exit 1
+fi
+
+if [ ! -d $MY_TEST_AREA/LArMachineLearningData/ ]
+then
+  echo "LArMachineLearningData does not exist in MY_TEST_AREA: $MY_TEST_AREA, Not downloading the files"
+  exit 1
+fi
+
 ### PandoraMVAData
 mkdir -p $MY_TEST_AREA/LArMachineLearningData/PandoraMVAData
 cd $MY_TEST_AREA/LArMachineLearningData/PandoraMVAData
