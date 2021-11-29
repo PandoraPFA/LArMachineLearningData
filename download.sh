@@ -9,13 +9,13 @@ function download() {
 if [ -z $MY_TEST_AREA ]
 then
   echo "MY_TEST_AREA is not set, can't download the files"
-  exit 1
+  return 1
 fi
 
 if [ ! -d $MY_TEST_AREA/LArMachineLearningData/ ]
 then
   echo "LArMachineLearningData does not exist in MY_TEST_AREA: $MY_TEST_AREA, Not downloading the files"
-  exit 1
+  return 1
 fi
 
 ### PandoraMVAData
