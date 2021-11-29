@@ -43,5 +43,5 @@ The python script produces also a plot like [this example one](https://github.co
 
 The SvmName is the one added in the output .xml file, and can be changed in [example.py](https://github.com/PandoraPFA/MachineLearningData/blob/master/scripts/example.py)
 
-### Instructions for trauing a BDT
+### Instructions for training a BDT
 The general procedure to create a BDT follows the same structure as the SVM discussed above. The training examples produced by Pandora are compatible between the SVM and BDT models as long as they use the same set of `FeatureTools`. An example notebook, ExampleNotebook.ipynb, has been provided to show the procedure for optimising the hyper-parameters, training and validating the BDT. 
