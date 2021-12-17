@@ -84,4 +84,9 @@ This step is less time and memory consuming, so the input data can be scaled (fo
                 <SvmName>FinalPfoCharacterisation</SvmName>
 		...		
 The SvmName is the one added in the output .xml file, and can be changed in example.py 
-      			 
+
+# Determining Features
+The procedure for determining the features used in the MVA is outlined below, with the current feature sets listed in the experiment specific directories. 
+1. Identify the feature tools that are run in the `<FeatureTools>` XML tag. Note the order in which they are specified here defines the order in which they are run. 
+2. Find the corresponding tools in lar(pandora)content.
+3. Search for where the `featureVector` is appended with new features. Note that each tool can multiple features to the vector, and the order in which the vector is `pushed_back` will determine the order in which the features appear in the training data. 

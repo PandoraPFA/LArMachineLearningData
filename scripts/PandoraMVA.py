@@ -13,16 +13,16 @@ def LoadData(trainingFileName, delimiter=','):
     # Use the first example to get the number of columns
     with open(trainingFileName) as file:
         ncols = len(file.readline().split(delimiter))
-        
+
     # First column is a datestamp, so skip it
-    trainingSet = np.genfromtxt(trainingFileName, delimiter=delimiter, usecols=range(1,ncols), 
-                                dtype=None)
-                                
+    trainingSet = np.genfromtxt(trainingFileName, delimiter=delimiter, usecols=range(1,ncols),
+            dtype=None)
+
     nExamples = trainingSet.size
     nFeatures = ncols - 2 # last column is the response
-    
+
     return np.array(trainingSet), nFeatures, nExamples
-    
+
 #--------------------------------------------------------------------------------------------------
 
 def SplitTrainingSet(trainingSet, nFeatures):
@@ -34,11 +34,11 @@ def SplitTrainingSet(trainingSet, nFeatures):
         features = []
         for i in range(0, nFeatures):
             features.append(float(example[i])) # features in this SVM must be Python float
-            
+
         X.append(features)
 
     return np.array(X).astype(np.float64), np.array(Y).astype(np.int)
-    
+
 #--------------------------------------------------------------------------------------------------
 
 def Randomize(X, Y, setSameSeed=False):
@@ -47,22 +47,22 @@ def Randomize(X, Y, setSameSeed=False):
 
     order = np.random.permutation(Y.size)
     return X[order], Y[order]
-    
+
 #--------------------------------------------------------------------------------------------------
 
 def Sample(X, Y, testFraction=0.1):
     trainSize = int((1.0 - testFraction) * Y.size)
-    
+
     X_train = X[:trainSize]
     Y_train = Y[:trainSize]
     X_test  = X[trainSize:]
     Y_test  = Y[trainSize:]
-    
+
     return X_train, Y_train, X_test, Y_test
-    
+
 #--------------------------------------------------------------------------------------------------
 
-def ValidateModel(model, X_test, Y_test):               
+def ValidateModel(model, X_test, Y_test):
     return model.score(X_test, Y_test)
 
 #--------------------------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ def OverwriteStdout(text):
 def OpenXmlTag(modelFile, tag, indentation):
     modelFile.write((' ' * indentation) + '<' + tag + '>\n')
     return indentation + 4
-    
+
 #--------------------------------------------------------------------------------------------------
 
 def CloseXmlTag(modelFile, tag, indentation):
@@ -96,13 +96,13 @@ def WriteXmlFeatureVector(modelFile, featureVector, tag, indentation):
             firstTime=False
         else:
             modelFile.write(' ' + str(feature))
-            
+
     modelFile.write('</' + tag + '>\n')
-    
+
 #--------------------------------------------------------------------------------------------------
 
 def WriteXmlFeature(modelFile, feature, tag, indentation):
     modelFile.write((' ' * indentation) + '<' + tag + '>')
-    modelFile.write(str(feature))     
+    modelFile.write(str(feature))
     modelFile.write('</' + tag + '>\n')
 

@@ -1,4 +1,16 @@
 PandoraMVAData/
+PandoraMVAs/
 PandoraNetworkData/
 *~
+scripts/__pycache__/
 
+// By default ignore weights files
+*xml
+*pkl
+
+// Ignore images
+*.pdf
+
+// Jupyter Notebooks
+docs/
+.ipynb_checkpoints/
