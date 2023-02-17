@@ -49,13 +49,17 @@ mkdir -p $MY_TEST_AREA/LArMachineLearningData/PandoraNetworkData
 cd $MY_TEST_AREA/LArMachineLearningData/PandoraNetworkData
 
 # DUNE
-#download "1EOmyofKFl9NAZqRh-z34bY7-M9lXvG9U" "PandoraUnet_TSID_DUNEFD_U_v03_25_00.pt"
-#download "1NqeKHnCkWdTIKw6CLqUZp4l-q7EIkAQa" "PandoraUnet_TSID_DUNEFD_V_v03_25_00.pt"
-#download "1kWfT8d4GtlMsoxh6cH0quIUNRdHSClhj" "PandoraUnet_TSID_DUNEFD_W_v03_25_00.pt"
 
-download "10AzTGyaW-XwYz5i-jNUxZXW77dt4SNZH" "PandoraUnet_Vertex_DUNEFD_1_U_v04_00_00.pt"
-download "128iZ6lYFzW6URxHarMdmUG7p8xO_qtlT" "PandoraUnet_Vertex_DUNEFD_1_V_v04_00_00.pt"
-download "1VMBuNyS3U3OLI1RegC5Pxg3xBf8uA_n8" "PandoraUnet_Vertex_DUNEFD_1_W_v04_00_00.pt"
-download "1nFy3exwMA8BeH-x6mWGSf0SwRHrTbS2C" "PandoraUnet_Vertex_DUNEFD_2_U_v04_00_00.pt"
-download "12-fMYzUSXqNqt21IMWnFMXgQ6y1tcuS-" "PandoraUnet_Vertex_DUNEFD_2_V_v04_00_00.pt"
-download "1Z-5ZjInzKcfcgXClt9jMM66ZJEfEP2-Z" "PandoraUnet_Vertex_DUNEFD_2_W_v04_00_00.pt"
+download "1ahhvfyIfkhw1qisWoq56_1fXwKfwK2oK" "PandoraNet_Vertex_DUNEFD_HD_Accel_1_U_v04_03_00.pt"
+download "1iSwz4hPbbQLjtSBMIheyghdUL_jQkttI" "PandoraNet_Vertex_DUNEFD_HD_Accel_1_V_v04_03_00.pt"
+download "1B-Hf32cWXXdJsuEKm5O_xjv4wGjpgDJ_" "PandoraNet_Vertex_DUNEFD_HD_Accel_1_W_v04_03_00.pt"
+download "1xoJnjllqqeQG1kRj4k3r-R-p2T67GxJ0" "PandoraNet_Vertex_DUNEFD_HD_Accel_2_U_v04_03_00.pt"
+download "1wjkDjgqxEEFvZwjsU2eFFhRC-pGNDJh2" "PandoraNet_Vertex_DUNEFD_HD_Accel_2_V_v04_03_00.pt"
+download "1s3SyZii34b8s-2cE6q25apyboUa5cbv3" "PandoraNet_Vertex_DUNEFD_HD_Accel_2_W_v04_03_00.pt"
+
+download "1BYX6Y0sirNzBw0qsj6Xsa-qOAdqn5PG7" "PandoraNet_Vertex_DUNEFD_HD_Atmos_1_U_v04_03_00.pt"
+download "1AWywC9LsCkuNo6lVo5VAWvlM2n-FWTnx" "PandoraNet_Vertex_DUNEFD_HD_Atmos_1_V_v04_03_00.pt"
+download "1CLV64endpentEDSoRFTu6obWoYL2Bx-a" "PandoraNet_Vertex_DUNEFD_HD_Atmos_1_W_v04_03_00.pt"
+download "1HYhF3xGcZXOVxXrjDnYgV_34-q5d58UC" "PandoraNet_Vertex_DUNEFD_HD_Atmos_2_U_v04_03_00.pt"
+download "1DDqVFhnRBPy6ZIehd9u1SwyiKaWC3hSF" "PandoraNet_Vertex_DUNEFD_HD_Atmos_2_V_v04_03_00.pt"
+download "1JLr5GfjSNt6vO81ZCv42UHH09hjvtFw7" "PandoraNet_Vertex_DUNEFD_HD_Atmos_2_W_v04_03_00.pt"
