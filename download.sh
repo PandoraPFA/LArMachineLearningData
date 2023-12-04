@@ -90,4 +90,16 @@ then
   download "1JLr5GfjSNt6vO81ZCv42UHH09hjvtFw7" "PandoraNet_Vertex_DUNEFD_HD_Atmos_2_W_v04_03_00.pt"
 fi
 
+# DUNE ND
+
+if [[ "$1" == "dunend" ]]
+then
+  download "1rFR3zYxTgXNzqvdQQ7e7PM9d_dtDyMTj" "PandoraNet_Vertex_DUNEND_Accel_1_U_v04_06_00.pt"
+  download "10mVZEUxstmUMALhK4ja9gDEtWXOd6SZ-" "PandoraNet_Vertex_DUNEND_Accel_1_V_v04_06_00.pt"
+  download "1Sq4YHhhH9gOEIZipEu9lXgcjw8PlfGGi" "PandoraNet_Vertex_DUNEND_Accel_1_W_v04_06_00.pt"
+  download "1i3AYNEM0liddEzZp1ST9QR5rcORElAXN" "PandoraNet_Vertex_DUNEND_Accel_2_U_v04_06_00.pt"
+  download "1ZpmskwhfeorVSRQPhzRoDRkzZ5TmOPz1" "PandoraNet_Vertex_DUNEND_Accel_2_V_v04_06_00.pt"
+  download "1pEQ7d2OLDMkx6-s0l0WRyC-F86i_N-mo" "PandoraNet_Vertex_DUNEND_Accel_2_W_v04_06_00.pt"
+fi
+
 cd $MY_TEST_AREA/LArMachineLearningData
