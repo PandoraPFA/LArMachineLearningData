@@ -2,6 +2,10 @@ function download() {
    wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=$1' -O- | sed -En 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=$1" -O $2 && rm -rf /tmp/cookies.txt
 }
 
+function curl_download() {
+   curl -L "https://drive.usercontent.google.com/download?id=$1&confirm=xxx" -o $2
+}
+
 # Google Drive links have the form https://drive.google.com/file/d/FILEID/view?usp=sharing
 # You want the FILEID
 # Note: For some reason the above function doesn't work for the files, so you need to set the two &id=FILEID instances in the link
@@ -32,20 +36,20 @@ cd $MY_TEST_AREA/LArMachineLearningData/PandoraMVAData
 # MicroBooNE
 if [[ "$1" == "sbnd" ]]
 then
-  wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1b3m9Glj1Qjx5tnSdvqLIBNFBWpH8NrvX' -O- | sed -En 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1b3m9Glj1Qjx5tnSdvqLIBNFBWpH8NrvX" -O PandoraSvm_v03_11_00.xml && rm -rf /tmp/cookies.txt
+  curl_download "1b3m9Glj1Qjx5tnSdvqLIBNFBWpH8NrvX" "PandoraSvm_v03_11_00.xml"
 fi
 
 # DUNE
 
 if [[ "$1" == "dune" ]]
 then
-  wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1i5mi545-NQU15raIyYOwbWY8VQuCv8Ox' -O- | sed -En 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1i5mi545-NQU15raIyYOwbWY8VQuCv8Ox" -O PandoraBdt_BeamParticleId_ProtoDUNESP_v03_26_00.xml && rm -rf /tmp/cookies.txt
-  wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1eeiScUaLjEoACxCyb73JwGnuMsJ1Y4Iq' -O- | sed -En 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1eeiScUaLjEoACxCyb73JwGnuMsJ1Y4Iq" -O PandoraBdt_PfoCharacterisation_ProtoDUNESP_v03_26_00.xml && rm -rf /tmp/cookies.txt
-  wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=12cl3gpijkcpIIZZGeThtH2e4Vzvf6Xqu' -O- | sed -En 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=12cl3gpijkcpIIZZGeThtH2e4Vzvf6Xqu" -O PandoraBdt_Vertexing_ProtoDUNESP_v03_26_00.xml && rm -rf /tmp/cookies.txt
+  curl_download "1i5mi545-NQU15raIyYOwbWY8VQuCv8Ox" "PandoraBdt_BeamParticleId_ProtoDUNESP_v03_26_00.xml"
+  curl_download "1eeiScUaLjEoACxCyb73JwGnuMsJ1Y4Iq" "PandoraBdt_PfoCharacterisation_ProtoDUNESP_v03_26_00.xml"
+  curl_download "12cl3gpijkcpIIZZGeThtH2e4Vzvf6Xqu" "PandoraBdt_Vertexing_ProtoDUNESP_v03_26_00.xml"
 
-  wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=19eRtRnbqinLo_90hKMD9wjaHmpXU1m6j' -O- | sed -En 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=19eRtRnbqinLo_90hKMD9wjaHmpXU1m6j" -O PandoraBdt_PfoCharacterisation_DUNEFD_HD_v04_06_00.xml && rm -rf /tmp/cookies.txt
-  wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1RSKy9hGO6BMVQL6NJMcHIk0mAP3MnqOS' -O- | sed -En 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1RSKy9hGO6BMVQL6NJMcHIk0mAP3MnqOS" -O PandoraBdt_PfoCharacterisation_DUNEFD_VD_v04_06_00.xml && rm -rf /tmp/cookies.txt
-  wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=17XqHdu53btjfnRF4-mHgv5mpE1HoDpDT' -O- | sed -En 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=17XqHdu53btjfnRF4-mHgv5mpE1HoDpDT" -O PandoraBdt_Vertexing_DUNEFD_v03_27_00.xml && rm -rf /tmp/cookies.txt
+  curl_download "19eRtRnbqinLo_90hKMD9wjaHmpXU1m6j" "PandoraBdt_PfoCharacterisation_DUNEFD_HD_v04_06_00.xml"
+  curl_download "1RSKy9hGO6BMVQL6NJMcHIk0mAP3MnqOS" "PandoraBdt_PfoCharacterisation_DUNEFD_VD_v04_06_00.xml"
+  curl_download "17XqHdu53btjfnRF4-mHgv5mpE1HoDpDT" "PandoraBdt_Vertexing_DUNEFD_v03_27_00.xml"
 fi
 
 ### PandoraMVAs
@@ -55,10 +59,8 @@ cd $MY_TEST_AREA/LArMachineLearningData/PandoraMVAs
 # SBND
 if [[ "$1" == "sbnd" ]]
 then
-  wget --no-check-certificate --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1lGn-_BCK9TpEdVZUElAAxFJ9ynazcCY7' -O- | sed -En 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1lGn-_BCK9TpEdVZUElAAxFJ9ynazcCY7" -O PandoraBdt_v09_32_00_SBND.xml && rm -rf /tmp/cookies.txt
+  curl_download "1lGn-_BCK9TpEdVZUElAAxFJ9ynazcCY7" "PandoraBdt_v09_32_00_SBND.xml"
 fi
-
-
 
 ### PandoraNetworkData
 mkdir -p $MY_TEST_AREA/LArMachineLearningData/PandoraNetworkData
