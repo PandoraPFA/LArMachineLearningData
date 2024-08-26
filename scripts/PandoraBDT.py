@@ -20,6 +20,10 @@ import math
 
 from PandoraMVA import *
 
+def save_figure(fig, name):
+    fig.savefig(name + '.png', facecolor='w', bbox_inches='tight')
+    fig.savefig(name + '.pdf', facecolor='w', bbox_inches='tight')
+
 def DrawVariables(X, Y):
     plot_colors = ['r', 'g', 'b']
     plot_step = 1.0
@@ -46,8 +50,8 @@ def DrawVariables(X, Y):
         plt.xlabel('Variable')
 
         plt.tight_layout()
-        plotName = 'Feature_' + str(feature) + '.pdf'
-        plt.savefig(plotName)
+        plotName = 'Feature_' + str(feature)
+        save_figure(plt, plotName)
         plt.show()
         plt.close()
 
@@ -69,7 +73,7 @@ def DrawVariablesDF(df, parameters):
             ax.yscale('log')
 
         plt.tight_layout()
-        plt.savefig('Feature_' + column + '.pdf')
+        save_figure(plt, 'Feature_' + column)
         plt.show()
         plt.close()
 
@@ -143,7 +147,7 @@ def CorrelationDF(df, label):
 
     ax.invert_yaxis()
     # ax.set_ylim(-0., len(df.columns)-0.5)
-    plt.savefig(label.replace(" ", "_") + ".pdf", bbox_inches='tight')
+    save_figure(plt, label.replace(" ", "_"))
     plt.show()
     plt.close()
 

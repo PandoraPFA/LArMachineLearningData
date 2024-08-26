@@ -37,7 +37,7 @@ def SplitTrainingSet(trainingSet, nFeatures):
 
         X.append(features)
 
-    return np.array(X).astype(np.float64), np.array(Y).astype(np.int)
+    return np.array(X).astype(float), np.array(Y).astype(int)
 
 #--------------------------------------------------------------------------------------------------
 
