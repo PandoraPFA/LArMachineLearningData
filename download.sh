@@ -34,7 +34,7 @@ mkdir -p $MY_TEST_AREA/LArMachineLearningData/PandoraMVAData
 cd $MY_TEST_AREA/LArMachineLearningData/PandoraMVAData
 
 # MicroBooNE
-if [[ "$1" == "sbnd" ]]
+if [[ "$1" == "uboone" ]]
 then
   curl_download "1b3m9Glj1Qjx5tnSdvqLIBNFBWpH8NrvX" "PandoraSvm_v03_11_00.xml"
 fi
@@ -59,7 +59,7 @@ cd $MY_TEST_AREA/LArMachineLearningData/PandoraMVAs
 # SBND
 if [[ "$1" == "sbnd" ]]
 then
-  curl_download "1lGn-_BCK9TpEdVZUElAAxFJ9ynazcCY7" "PandoraBdt_v09_32_00_SBND.xml"
+  curl_download "1RpIanzW7Z8Blv7ImdPOJkqib2VmIC2Zq" "PandoraBdt_v09_67_00_SBND.xml"
 fi
 
 ### PandoraNetworkData
