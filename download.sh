@@ -90,6 +90,10 @@ then
   download "1HYhF3xGcZXOVxXrjDnYgV_34-q5d58UC" "PandoraNet_Vertex_DUNEFD_HD_Atmos_2_U_v04_03_00.pt"
   download "1DDqVFhnRBPy6ZIehd9u1SwyiKaWC3hSF" "PandoraNet_Vertex_DUNEFD_HD_Atmos_2_V_v04_03_00.pt"
   download "1JLr5GfjSNt6vO81ZCv42UHH09hjvtFw7" "PandoraNet_Vertex_DUNEFD_HD_Atmos_2_W_v04_03_00.pt"
+
+  download "13oGLdQKE5tFuvh2c0_06xwU8-8qjUQxH" "PandoraNet_SecVertex_DUNEFD_HD_Accel_1_U_v04_13_00.pt"
+  download "1fmDwr9kJ5RNfIl3u3Dq5P9T5mIy3_ZbB" "PandoraNet_SecVertex_DUNEFD_HD_Accel_1_V_v04_13_00.pt"
+  download "1XOLRg-xydjPx-7i7OCsk88dRzpCgrMyN" "PandoraNet_SecVertex_DUNEFD_HD_Accel_1_W_v04_13_00.pt"
 fi
 
 # DUNE ND
