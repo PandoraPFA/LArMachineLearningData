@@ -9,12 +9,83 @@ from sklearn.metrics import balanced_accuracy_score, accuracy_score, confusion_m
 #################################################################################################################################
 #################################################################################################################################
 
-def plot_scores_classifier(pos_score_train, neg_score_train, pos_score_test, neg_score_test):
+class LinkMetrics :
+    def __init__(self, nEdges):
+        self.edge_metrics = []        
+        
+        for i in range(nEdges) :
+            self.edge_metrics.append(EdgeMetrics())
+            
+        self.classifier_metrics = ClassifierMetrics()
+        
+    def Evaluate(self, threshold) :        
+        for edge_metrics in self.edge_metrics:
+            edge_metrics.Evaluate()
+
+        self.classifier_metrics.Evaluate(threshold)
+
+#################################################################################################################################
+#################################################################################################################################        
+        
+class EdgeMetrics :
+    def __init__(self):
+        self.total_batches = 0 
+        self.total_loss = 0
+        self.av_loss = 0
+        self.true_scores = []
+        self.background_scores = []
+        self.wrong_orientation_scores = []
+        
+    def Fill(self, loss, pred, truth) :
+        self.total_batches += 1
+        self.total_loss += loss.item()  
+        self.true_scores.extend(np.array(pred.tolist())[torch.column_stack((truth == 1, truth == 1, truth == 1)).numpy()].reshape(-1, 3))
+        self.background_scores.extend(np.array(pred.tolist())[torch.column_stack((truth == 0, truth == 0, truth == 0)).numpy()].reshape(-1, 3))
+        self.wrong_orientation_scores.extend(np.array(pred.tolist())[torch.column_stack((truth == 2, truth == 2, truth == 2)).numpy()].reshape(-1, 3))
+        
+    def Evaluate(self) :
+        self.av_loss = float(self.total_loss) / float(self.total_batches)
+        
+#################################################################################################################################
+#################################################################################################################################        
+        
+class ClassifierMetrics :
+    def __init__(self):
+        self.total_batches = 0
+        self.total_loss = 0
+        self.pos_scores = []
+        self.neg_scores = []
+        self.pos_as_pos_frac = 0
+        self.pos_as_neg_frac = 0
+        self.neg_as_pos_frac = 0
+        self.neg_as_neg_frac = 0
+        
+    def Fill(self, loss, pred, truth) :
+        self.total_batches += 1
+        self.total_loss += loss.item()
+        self.pos_scores.extend(np.array(pred.tolist())[(truth == 1).numpy()].reshape(-1))
+        self.neg_scores.extend(np.array(pred.tolist())[(truth == 0).numpy()].reshape(-1))
+        
+    def Evaluate(self, threshold) :
+        self.av_loss = float(self.total_loss) / float(self.total_batches)          
+        pos_as_pos = np.count_nonzero(np.array(self.pos_scores) > threshold)
+        pos_as_neg = np.count_nonzero(np.array(self.pos_scores) < threshold)
+        neg_as_pos = np.count_nonzero(np.array(self.neg_scores) > threshold)
+        neg_as_neg = np.count_nonzero(np.array(self.neg_scores) < threshold)    
+        self.pos_as_pos_frac = float(pos_as_pos) / float(pos_as_pos + pos_as_neg)
+        self.pos_as_neg_frac = float(pos_as_neg) / float(pos_as_pos + pos_as_neg)
+        self.neg_as_pos_frac = float(neg_as_pos) / float(neg_as_pos + neg_as_neg)
+        self.neg_as_neg_frac = float(neg_as_neg) / float(neg_as_pos + neg_as_neg)
+
+#################################################################################################################################
+#################################################################################################################################
+
+def plot_scores_classifier(linkMetrics_train, linkMetrics_test) :
     
-    pos_score_train = np.array(pos_score_train)
-    neg_score_train = np.array(neg_score_train)
-    pos_score_test = np.array(pos_score_test)
-    neg_score_test = np.array(neg_score_test)    
+    pos_score_train = np.array(linkMetrics_train.classifier_metrics.pos_scores)
+    neg_score_train = np.array(linkMetrics_train.classifier_metrics.neg_scores)
+    pos_score_test = np.array(linkMetrics_test.classifier_metrics.pos_scores)
+    neg_score_test = np.array(linkMetrics_test.classifier_metrics.neg_scores)   
     
     pos_plotting_weights_train = 1.0 / float(len(pos_score_train))
     pos_plotting_weights_train = np.ones(len(pos_score_train)) * pos_plotting_weights_train
@@ -42,15 +113,14 @@ def plot_scores_classifier(pos_score_train, neg_score_train, pos_score_test, neg
 #################################################################################################################################
 #################################################################################################################################
     
-def plot_scores_branch(background_score_train, true_score_train, wrong_orientation_score_train, \
-                       background_score_test, true_score_test, wrong_orientation_score_test, target_class):
+def plot_scores_branch(linkMetrics_train, linkMetrics_test, edge_index, target_class) :
     
-    background_score_train = np.array(background_score_train)[:,target_class]
-    true_score_train = np.array(true_score_train)[:,target_class]
-    wrong_orientation_score_train = np.array(wrong_orientation_score_train)[:,target_class]
-    background_score_test = np.array(background_score_test)[:,target_class]
-    true_score_test = np.array(true_score_test)[:,target_class]
-    wrong_orientation_score_test = np.array(wrong_orientation_score_test)[:,target_class]    
+    background_score_train = np.array(linkMetrics_train.edge_metrics[edge_index].background_scores)[:,target_class]
+    true_score_train = np.array(linkMetrics_train.edge_metrics[edge_index].true_scores)[:,target_class]
+    wrong_orientation_score_train = np.array(linkMetrics_train.edge_metrics[edge_index].wrong_orientation_scores)[:,target_class]
+    background_score_test = np.array(linkMetrics_test.edge_metrics[edge_index].background_scores)[:,target_class]
+    true_score_test = np.array(linkMetrics_test.edge_metrics[edge_index].true_scores)[:,target_class]
+    wrong_orientation_score_test = np.array(linkMetrics_test.edge_metrics[edge_index].wrong_orientation_scores)[:,target_class]    
     
     background_plotting_weights_train = 1.0 / float(len(background_score_train))
     background_plotting_weights_train = np.ones(len(background_score_train)) * background_plotting_weights_train
@@ -79,8 +149,11 @@ def plot_scores_branch(background_score_train, true_score_train, wrong_orientati
 #################################################################################################################################
 #################################################################################################################################
 
-def plot_loss_evolution(epochs, training_loss, test_loss, label):
+def plot_classifier_loss_evolution(epochs, linkMetricsList_train, linkMetricsList_test, label):
 
+    training_loss = [linkMetricsList_train[i].classifier_metrics.av_loss for i in range(len(epochs))]
+    test_loss = [linkMetricsList_test[i].classifier_metrics.av_loss for i in range(len(epochs))]
+    
     plt.plot(epochs, training_loss, label='Training Loss', color='b')
     plt.plot(epochs, test_loss, label='Validation Loss', color='g')
 
@@ -93,12 +166,34 @@ def plot_loss_evolution(epochs, training_loss, test_loss, label):
     plt.show()
     
 #################################################################################################################################
+#################################################################################################################################    
+    
+def plot_branch_loss_evolution(epochs, linkMetricsList_train, linkMetricsList_test, edge_index, label):
+
+    training_loss = [linkMetricsList_train[i].edge_metrics[edge_index].av_loss for i in range(len(epochs))]
+    test_loss = [linkMetricsList_test[i].edge_metrics[edge_index].av_loss for i in range(len(epochs))]
+    
+    plt.plot(epochs, training_loss, label='Training Loss', color='b')
+    plt.plot(epochs, test_loss, label='Validation Loss', color='g')
+
+    plt.xlabel('Epochs')
+    plt.title(label)
+    plt.ylabel('Loss')
+    plt.tick_params('y')
+    plt.legend(loc='upper right')
+
+    plt.show()    
+    
+#################################################################################################################################
 #################################################################################################################################
     
-def calculate_accuracy(pos_test_score, neg_test_score):
+def calculate_accuracy(linkMetrics):
     
-    scores = torch.cat([pos_test_score, neg_test_score])
-    true_labels = torch.cat([torch.ones(pos_test_score.shape[0]), torch.zeros(neg_test_score.shape[0])]).numpy()
+    pos_scores = torch.tensor(linkMetrics.classifier_metrics.pos_scores)
+    neg_scores = torch.tensor(linkMetrics.classifier_metrics.neg_scores)
+    
+    scores = torch.cat([pos_scores, neg_scores])
+    true_labels = torch.cat([torch.ones(pos_scores.shape[0]), torch.zeros(neg_scores.shape[0])]).numpy()
 
     thresholds = torch.arange(0.05, 1.0, 0.05)
     predictions = []
@@ -118,8 +213,19 @@ def calculate_accuracy(pos_test_score, neg_test_score):
 #################################################################################################################################
 #################################################################################################################################
 
-def plot_edge_rate(epochs, correct_edge_train, incorrect_edge_train, correct_edge_test, incorrect_edge_test, is_true_positive):
+def plot_edge_rate(epochs, linkMetricsList_train, linkMetricsList_test, is_true_positive):
 
+    if (is_true_positive) :
+        correct_edge_train = [linkMetricsList_train[i].classifier_metrics.pos_as_pos_frac for i in range(len(epochs))]
+        incorrect_edge_train = [linkMetricsList_train[i].classifier_metrics.pos_as_neg_frac for i in range(len(epochs))]
+        correct_edge_test = [linkMetricsList_test[i].classifier_metrics.pos_as_pos_frac for i in range(len(epochs))]
+        incorrect_edge_test = [linkMetricsList_test[i].classifier_metrics.pos_as_neg_frac for i in range(len(epochs))]
+    else :
+        correct_edge_train = [linkMetricsList_train[i].classifier_metrics.neg_as_neg_frac for i in range(len(epochs))]
+        incorrect_edge_train = [linkMetricsList_train[i].classifier_metrics.neg_as_pos_frac for i in range(len(epochs))]
+        correct_edge_test = [linkMetricsList_test[i].classifier_metrics.neg_as_neg_frac for i in range(len(epochs))]
+        incorrect_edge_test = [linkMetricsList_test[i].classifier_metrics.neg_as_pos_frac for i in range(len(epochs))]        
+    
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     correct_label = 'positive_as_positive' if is_true_positive else 'negative_as_negative'
