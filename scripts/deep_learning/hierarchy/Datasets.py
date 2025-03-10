@@ -4,89 +4,60 @@ from torch.utils.data import Dataset, DataLoader
 #################################################################################################################################
 #################################################################################################################################
 
-class NuToTrackDataset(Dataset):
-    def __init__(self, input0, input1, y0, y1, y):
-        # convert into PyTorch tensors and remember them
-        self.input0 = torch.tensor(input0, dtype=torch.float32)
-        self.input1 = torch.tensor(input1, dtype=torch.float32)
-        self.y0 = torch.tensor(y0, dtype=torch.float32)
-        self.y1 = torch.tensor(y1, dtype=torch.float32)
-        self.y = torch.tensor(y, dtype=torch.float32)
+class TwoEdgeDataset(Dataset):
+    def __init__(self, vars_edge0, vars_edge1, truth_edge0, truth_edge1, truth_link, truth_gen):
+        self.vars_edge0 = torch.tensor(vars_edge0, dtype=torch.float32)
+        self.vars_edge1 = torch.tensor(vars_edge1, dtype=torch.float32)
+        self.truth_edge0 = torch.tensor(truth_edge0, dtype=torch.long)
+        self.truth_edge1 = torch.tensor(truth_edge1, dtype=torch.long)
+        self.truth_link = torch.tensor(truth_link, dtype=torch.float32)
+        self.truth_gen = torch.tensor(truth_gen, dtype=torch.int)
         
     def __len__(self):
-        # this should return the size of the dataset
-        return len(self.y)
+        return len(self.truth_link)
     
     def __getitem__(self, idx):
-        # this should return one sample from the dataset
-        features0 = self.input0[idx]
-        features1 = self.input1[idx]
-        target0 = self.y0[idx]
-        target1 = self.y1[idx]
-        target = self.y[idx]
-        return features0, features1, target0, target1, target
+        vars_edge0 = self.vars_edge0[idx]
+        vars_edge1 = self.vars_edge1[idx]
+        truth_edge0 = self.truth_edge0[idx]
+        truth_edge1 = self.truth_edge1[idx]
+        truth_link = self.truth_link[idx]
+        truth_gen = self.truth_gen[idx]
+        return {"edge0":(vars_edge0, truth_edge0), "edge1":(vars_edge1, truth_edge1), "truth_link":truth_link, "truth_gen":truth_gen}
     
 #################################################################################################################################
 #################################################################################################################################
 
-class TrackToShowerDataset(Dataset):
-    def __init__(self, input0, input1, y0, y1, y, trueGen):
-        # convert into PyTorch tensors and remember them
-        self.input0 = torch.tensor(input0, dtype=torch.float32)
-        self.input1 = torch.tensor(input1, dtype=torch.float32)
-        self.y0 = torch.tensor(y0, dtype=torch.float32)
-        self.y1 = torch.tensor(y1, dtype=torch.float32)
-        self.y = torch.tensor(y, dtype=torch.float32)
-        self.trueGen = torch.tensor(trueGen, dtype=torch.int)
+class FourEdgeDataset(Dataset):
+    def __init__(self, vars_edge0, vars_edge1, vars_edge2, vars_edge3, truth_edge0, truth_edge1, truth_edge2, truth_edge3, truth_link, truth_gen):
+        self.vars_edge0 = torch.tensor(vars_edge0, dtype=torch.float32)
+        self.vars_edge1 = torch.tensor(vars_edge1, dtype=torch.float32)
+        self.vars_edge2 = torch.tensor(vars_edge2, dtype=torch.float32)
+        self.vars_edge3 = torch.tensor(vars_edge3, dtype=torch.float32)        
+        self.truth_edge0 = torch.tensor(truth_edge0, dtype=torch.long)
+        self.truth_edge1 = torch.tensor(truth_edge1, dtype=torch.long)
+        self.truth_edge2 = torch.tensor(truth_edge2, dtype=torch.long)
+        self.truth_edge3 = torch.tensor(truth_edge3, dtype=torch.long)        
+        self.truth_link = torch.tensor(truth_link, dtype=torch.float32)
+        self.truth_gen = torch.tensor(truth_gen, dtype=torch.int)
         
     def __len__(self):
-        # this should return the size of the dataset
-        return len(self.y)
+        return len(self.truth_link)
     
     def __getitem__(self, idx):
-        # this should return one sample from the dataset
-        features0 = self.input0[idx]
-        features1 = self.input1[idx]
-        target0 = self.y0[idx]
-        target1 = self.y1[idx]
-        target = self.y[idx]
-        trueGen = self.trueGen[idx]
-        return features0, features1, target0, target1, target, trueGen
-    
-#################################################################################################################################
-#################################################################################################################################
+        vars_edge0 = self.vars_edge0[idx]
+        vars_edge1 = self.vars_edge1[idx]
+        vars_edge2 = self.vars_edge2[idx]
+        vars_edge3 = self.vars_edge3[idx]        
+        truth_edge0 = self.truth_edge0[idx]
+        truth_edge1 = self.truth_edge1[idx]
+        truth_edge2 = self.truth_edge2[idx]
+        truth_edge3 = self.truth_edge3[idx]        
+        truth_link = self.truth_link[idx]
+        truth_gen = self.truth_gen[idx]
+        return {"edge0":(vars_edge0, truth_edge0), "edge1":(vars_edge1, truth_edge1), "edge2":(vars_edge2, truth_edge2), \
+                "edge3":(vars_edge3, truth_edge3), "truth_link":truth_link, "truth_gen":truth_gen}
 
-class TrackToTrackDataset(Dataset):
-    def __init__(self, input0, input1, input2, input3, y0, y1, y2, y3, y, trueGen):
-        # convert into PyTorch tensors and remember them
-        self.input0 = torch.tensor(input0, dtype=torch.float32)
-        self.input1 = torch.tensor(input1, dtype=torch.float32)
-        self.input2 = torch.tensor(input2, dtype=torch.float32)
-        self.input3 = torch.tensor(input3, dtype=torch.float32)        
-        self.y0 = torch.tensor(y0, dtype=torch.float32)
-        self.y1 = torch.tensor(y1, dtype=torch.float32)
-        self.y2 = torch.tensor(y2, dtype=torch.float32)
-        self.y3 = torch.tensor(y3, dtype=torch.float32)        
-        self.y = torch.tensor(y, dtype=torch.float32)
-        self.trueGen = torch.tensor(trueGen, dtype=torch.int)
-        
-    def __len__(self):
-        # this should return the size of the dataset
-        return len(self.y)
-    
-    def __getitem__(self, idx):
-        # this should return one sample from the dataset
-        features0 = self.input0[idx]
-        features1 = self.input1[idx]
-        features2 = self.input2[idx]
-        features3 = self.input3[idx]        
-        target0 = self.y0[idx]
-        target1 = self.y1[idx]
-        target2 = self.y2[idx]
-        target3 = self.y3[idx]        
-        target = self.y[idx]
-        trueGen = self.trueGen[idx]
-        return features0, features1, features2, features3, target0, target1, target2, target3, target, trueGen
     
 #################################################################################################################################
 #################################################################################################################################

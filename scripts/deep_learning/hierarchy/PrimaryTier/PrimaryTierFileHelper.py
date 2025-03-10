@@ -1,294 +1,165 @@
 import numpy as np
 import uproot
 import math
+import copy
 from sklearn.utils import shuffle
-import Normalise 
+import Utilities 
                     
-############################################################################################################################################                      
-
-def readTreeGroupLinks_track(fileName, normalise) :
-        
-    ###################################
-    # To pull out of tree
-    ###################################   
-    # Link variables
-    primaryTrackScore = []
-    primaryNSpacepoints = []
-    primaryNuVertexSeparation = [[], []]
-    primaryStartRegionNHits = [[], []]
-    primaryStartRegionNParticles = [[], []]
-    primaryDCA = [[], []]
-    primaryConnectionExtrapDistance = [[], []]
-    primaryIsPOIClosestToNu = [[], []]
-    primaryClosestParentL = [[], []]
-    primaryClosestParentT = [[], []]    
-    # Training cuts 
-    trainingCutDCA = [] # only fill for correct orientation    
-    # Truth
-    isTruePrimaryLink = []
-    isLinkOrientationCorrect = []
-    y = []
-
-    print('Reading tree: ', str(fileName),', This may take a while...')
-
-    ####################################
-    # Set tree
-    ####################################    
-    treeFile = uproot.open(fileName)
-    tree = treeFile['PrimaryTrackTree_TRAIN']
-    branches = tree.arrays()
-
-    ####################################
-    # Set tree branches
-    ####################################
-    primaryNSpacepoints_file = np.array(branches['NSpacepoints'])
-    primaryNuVertexSeparation_file = np.array(branches['NuSeparation'])
-    primaryStartRegionNHits_file = np.array(branches['VertexRegionNHits'])            
-    primaryStartRegionNParticles_file = np.array(branches['VertexRegionNParticles'])            
-    primaryDCA_file = np.array(branches['DCA'])            
-    primaryConnectionExtrapDistance_file = np.array(branches['ConnectionExtrapDistance'])
-    primaryIsPOIClosestToNu_file = np.array(branches['IsPOIClosestToNu'])
-    primaryParentConnectionDistance_file = np.array(branches['ParentConnectionDistance'])
-    primaryChildConnectionDistance_file = np.array(branches['ChildConnectionDistance'])
-    # True
-    isTruePrimaryLink_file = np.array(branches['IsTrueLink'])
-    isLinkOrientationCorrect_file = np.array(branches['IsOrientationCorrect'])    
-    # nLinks
-    nLinks_file = isTruePrimaryLink_file.shape[0]
-
-    ####################################
-    # Now loop over loops to group them.
-    ####################################
-    linksMadeCounter = 0
-    this_y = [0, 0]
-    this_isLinkOrientationCorrect = [0, 0]
-    order = [0, 1]        
-
-    for iLink in range(nLinks_file) :
-
-        if ((iLink % 1000) == 0) :
-            print('iLink:', str(iLink) + '/' + str(nLinks_file))            
-
-        # Set truth            
-        isTruePrimaryLink_bool = math.isclose(isTruePrimaryLink_file[iLink], 1.0, rel_tol=0.001)
-        isLinkOrientationCorrect_bool = math.isclose(isLinkOrientationCorrect_file[iLink], 1.0, rel_tol=0.001)
-
-        if (isTruePrimaryLink_bool and isLinkOrientationCorrect_bool) :
-            this_y[order[linksMadeCounter]] = 1 
-        elif (isTruePrimaryLink_bool and (not isLinkOrientationCorrect_bool)) :
-            this_y[order[linksMadeCounter]] = 2
-
-        this_isLinkOrientationCorrect[order[linksMadeCounter]] = isLinkOrientationCorrect_file[iLink]
-
-        # set the link information
-        primaryNuVertexSeparation[order[linksMadeCounter]].append(primaryNuVertexSeparation_file[iLink])
-        primaryStartRegionNHits[order[linksMadeCounter]].append(primaryStartRegionNHits_file[iLink])
-        primaryStartRegionNParticles[order[linksMadeCounter]].append(primaryStartRegionNParticles_file[iLink])
-        primaryDCA[order[linksMadeCounter]].append(primaryDCA_file[iLink])
-        primaryConnectionExtrapDistance[order[linksMadeCounter]].append(primaryConnectionExtrapDistance_file[iLink])
-        primaryIsPOIClosestToNu[order[linksMadeCounter]].append(primaryIsPOIClosestToNu_file[iLink])
-        primaryClosestParentL[order[linksMadeCounter]].append(primaryParentConnectionDistance_file[iLink])
-        primaryClosestParentT[order[linksMadeCounter]].append(primaryChildConnectionDistance_file[iLink])
-
-        # Add in training cuts 
-        if (isLinkOrientationCorrect_bool) :
-            trainingCutDCA.append(primaryDCA_file[iLink])
-
-        linksMadeCounter = linksMadeCounter + 1
-
-        if (linksMadeCounter == 2) :
-            # set the common vars
-            primaryNSpacepoints.append(primaryNSpacepoints_file[iLink])   
-            # set truth
-            y.append(this_y)
-            isTruePrimaryLink.append(isTruePrimaryLink_file[iLink])
-            isLinkOrientationCorrect.append(this_isLinkOrientationCorrect)
-            # reset                        
-            linksMadeCounter = 0
-            this_y = [0, 0]
-            this_isLinkOrientationCorrect = [0, 0]
-            order = shuffle(order)
-
-    ###################################
-    # Now turn things into numpy arrays
-    ###################################
-    primaryTrackScore = np.array(primaryTrackScore, dtype='float64')
-    primaryNSpacepoints = np.array(primaryNSpacepoints, dtype='float64')
-    primaryNuVertexSeparation = np.array(primaryNuVertexSeparation, dtype='float64')
-    primaryStartRegionNHits = np.array(primaryStartRegionNHits, dtype='float64')
-    primaryStartRegionNParticles = np.array(primaryStartRegionNParticles, dtype='float64')
-    primaryDCA = np.array(primaryDCA, dtype='float64')
-    primaryConnectionExtrapDistance = np.array(primaryConnectionExtrapDistance, dtype='float64')
-    primaryIsPOIClosestToNu = np.array(primaryIsPOIClosestToNu, dtype='int')
-    primaryClosestParentL = np.array(primaryClosestParentL, dtype='float64')
-    primaryClosestParentT = np.array(primaryClosestParentT, dtype='float64')
-
-    # Truth
-    isTruePrimaryLink = np.array(isTruePrimaryLink)
-    isLinkOrientationCorrect = np.array(isLinkOrientationCorrect)
-    y = np.array(y)
-        
-    ###################################
-    # How many links do we have?
-    ###################################        
-    nLinks = isTruePrimaryLink.shape[0]   
-    print('We have ', str(nLinks), ' to train on!')        
-          
-    ###################################
-    # Normalise variables
-    ###################################
-    if (normalise) :
-        Normalise.normaliseXAxis(primaryNSpacepoints, Normalise.primaryNSpacepoints_min, Normalise.primaryNSpacepoints_max)    
-        Normalise.normaliseXAxis(primaryNuVertexSeparation, Normalise.primaryNuVertexSeparation_min, Normalise.primaryNuVertexSeparation_max)    
-        Normalise.normaliseXAxis(primaryStartRegionNHits, Normalise.primaryStartRegionNHits_min, Normalise.primaryStartRegionNHits_max)    
-        Normalise.normaliseXAxis(primaryStartRegionNParticles, Normalise.primaryStartRegionNParticles_min, Normalise.primaryStartRegionNParticles_max)    
-        Normalise.normaliseXAxis(primaryDCA, Normalise.primaryDCA_min, Normalise.primaryDCA_max)
-        Normalise.normaliseXAxis(primaryConnectionExtrapDistance, Normalise.primaryConnectionExtrapDistance_min, Normalise.primaryConnectionExtrapDistance_max)
-        Normalise.normaliseXAxis(primaryClosestParentL, Normalise.primaryClosestParentL_min, Normalise.primaryClosestParentL_max) 
-        Normalise.normaliseXAxis(primaryClosestParentT, Normalise.primaryClosestParentT_min, Normalise.primaryClosestParentT_max) 
-        
-    ###################################
-    # Concatenate
-    ###################################
-    coc0 = np.concatenate((np.concatenate((primaryNuVertexSeparation[0, :].reshape(nLinks, 1), \
-                                           primaryStartRegionNHits[0, :].reshape(nLinks, 1), \
-                                           primaryStartRegionNParticles[0, :].reshape(nLinks, 1), \
-                                           primaryDCA[0, :].reshape(nLinks, 1), \
-                                           primaryConnectionExtrapDistance[0, :].reshape(nLinks, 1), \
-                                           primaryIsPOIClosestToNu[0, :].reshape(nLinks, 1), \
-                                           primaryClosestParentL[0, :].reshape(nLinks, 1), \
-                                           primaryClosestParentT[0, :].reshape(nLinks, 1)), axis=1), \
-                           np.concatenate((primaryNuVertexSeparation[1, :].reshape(nLinks, 1), \
-                                           primaryStartRegionNHits[1, :].reshape(nLinks, 1), \
-                                           primaryStartRegionNParticles[1, :].reshape(nLinks, 1), \
-                                           primaryDCA[1, :].reshape(nLinks, 1), \
-                                           primaryConnectionExtrapDistance[1, :].reshape(nLinks, 1), \
-                                           primaryIsPOIClosestToNu[1, :].reshape(nLinks, 1), \
-                                           primaryClosestParentL[1, :].reshape(nLinks, 1), \
-                                           primaryClosestParentT[1, :].reshape(nLinks, 1)), axis=1)), axis=1)      
+############################################################################################################################################       
     
-    # concatenate variable_single and orientations
-    variables = np.concatenate((primaryNSpacepoints.reshape(nLinks, 1), \
-                                coc0), axis=1)
-
+def ReadTreeForTraining(isTrackMode, fileName, normalise) :
     
-    return nLinks, variables, y, isTruePrimaryLink, isLinkOrientationCorrect, trainingCutDCA
+    if (isTrackMode) :
+        nLinks = 2
+        treeName = "PrimaryTrackTree_TRAIN"
+    else :
+        nLinks = 1
+        treeName = "PrimaryShowerTree_TRAIN"
     
-############################################################################################################################################
-############################################################################################################################################        
+    with uproot.open(f"{fileName}:{treeName}") as tree:    
 
-def readTreeGroupLinks_shower(fileName, normalise) :
+        branches = tree.arrays()
+
+        # Vars (put astype as they are in tree)
+        primaryNSpacepoints = np.array(branches['NSpacepoints']).astype('float64').reshape(-1, nLinks)
+        primaryNuVertexSeparation = np.array(branches['NuSeparation']).astype('float64').reshape(-1, nLinks)
+        primaryStartRegionNHits = np.array(branches['VertexRegionNHits']).astype('float64').reshape(-1, nLinks)            
+        primaryStartRegionNParticles = np.array(branches['VertexRegionNParticles']).astype('float64').reshape(-1, nLinks)            
+        primaryDCA = np.array(branches['DCA']).astype('float64').reshape(-1, nLinks)            
+        primaryConnectionExtrapDistance = np.array(branches['ConnectionExtrapDistance']).astype('float64').reshape(-1, nLinks)
+        primaryIsPOIClosestToNu = np.array(branches['IsPOIClosestToNu']).astype('float64').reshape(-1, nLinks)
+        primaryClosestParentL = np.array(branches['ParentConnectionDistance']).astype('float64').reshape(-1, nLinks)
+        primaryClosestParentT = np.array(branches['ChildConnectionDistance']).astype('float64').reshape(-1, nLinks)
+        # True
+        isTruePrimaryLink = np.array(branches['IsTrueLink']).astype('int').reshape(-1, nLinks)
+        isLinkOrientationCorrect = np.array(branches['IsOrientationCorrect']).astype('int').reshape(-1, nLinks)    
         
-    ###################################
-    # To pull out of tree
-    ###################################
-    # Link variables
-    primaryNSpacepoints = []
-    primaryNuVertexSeparation = []
-    primaryStartRegionNHits = []
-    primaryStartRegionNParticles = []
-    primaryDCA = []
-    primaryConnectionExtrapDistance = []
-    primaryIsPOIClosestToNu = []
-    primaryClosestParentL = []
-    primaryClosestParentT = []
-    # Training cut 
-    trainingCutDCA = []
-    # Truth
-    isTruePrimaryLink = []
-    isLinkOrientationCorrect = []
-    y = []
+        # Form link truth (this will not be used in isTrackMode == False)
+        y = np.zeros(isTruePrimaryLink.shape).astype('int')
+        y[np.logical_and(isTruePrimaryLink,  isLinkOrientationCorrect)] = 1
+        y[np.logical_and(isTruePrimaryLink,  np.logical_not(isLinkOrientationCorrect))] = 2
+
+        # Training cuts!
+        trainingCutDCA = copy.deepcopy(primaryDCA)
+
+        # Reduce parent-child relationship vars to 1D arrays
+        primaryNSpacepoints = primaryNSpacepoints[:,0]
+        isTruePrimaryLink = isTruePrimaryLink[:,0]
+
+        if (isTrackMode) :
+            trainingCutDCA = trainingCutDCA[isLinkOrientationCorrect == 1]
+        else :
+            trainingCutDCA = trainingCutDCA[:,0]
+
+        # How many entries do we have?      
+        nEntries = isTruePrimaryLink.shape[0]   
+        print('We have ', str(nEntries), ' entries to train on!')
         
-    print('Reading tree: ', str(fileName),', This may take a while...')
+        # Shuffle links for each entry
+        randomIndices = np.random.rand(*(nEntries, nLinks)).argsort(axis=1)
+        primaryNuVertexSeparation = np.take_along_axis(primaryNuVertexSeparation, randomIndices, axis=1) 
+        primaryStartRegionNHits = np.take_along_axis(primaryStartRegionNHits, randomIndices, axis=1) 
+        primaryStartRegionNParticles = np.take_along_axis(primaryStartRegionNParticles, randomIndices, axis=1) 
+        primaryDCA = np.take_along_axis(primaryDCA, randomIndices, axis=1) 
+        primaryConnectionExtrapDistance = np.take_along_axis(primaryConnectionExtrapDistance, randomIndices, axis=1) 
+        primaryIsPOIClosestToNu = np.take_along_axis(primaryIsPOIClosestToNu, randomIndices, axis=1) 
+        primaryClosestParentL = np.take_along_axis(primaryClosestParentL, randomIndices, axis=1) 
+        primaryClosestParentT = np.take_along_axis(primaryClosestParentT, randomIndices, axis=1) 
+        y = np.take_along_axis(y, randomIndices, axis=1)
 
-    ####################################
-    # Set tree
-    ####################################    
-    treeFile = uproot.open(fileName)
-    tree = treeFile['PrimaryShowerTree_TRAIN']
-    branches = tree.arrays()
+        if (normalise) :
+            Utilities.normaliseXAxis(primaryNSpacepoints, Utilities.primaryNSpacepoints_min, Utilities.primaryNSpacepoints_max)    
+            Utilities.normaliseXAxis(primaryNuVertexSeparation, Utilities.primaryNuVertexSeparation_min, Utilities.primaryNuVertexSeparation_max)    
+            Utilities.normaliseXAxis(primaryStartRegionNHits, Utilities.primaryStartRegionNHits_min, Utilities.primaryStartRegionNHits_max)    
+            Utilities.normaliseXAxis(primaryStartRegionNParticles, Utilities.primaryStartRegionNParticles_min, Utilities.primaryStartRegionNParticles_max)    
+            Utilities.normaliseXAxis(primaryDCA, Utilities.primaryDCA_min, Utilities.primaryDCA_max)
+            Utilities.normaliseXAxis(primaryConnectionExtrapDistance, Utilities.primaryConnectionExtrapDistance_min, Utilities.primaryConnectionExtrapDistance_max)
+            Utilities.normaliseXAxis(primaryClosestParentL, Utilities.primaryClosestParentL_min, Utilities.primaryClosestParentL_max) 
+            Utilities.normaliseXAxis(primaryClosestParentT, Utilities.primaryClosestParentT_min, Utilities.primaryClosestParentT_max) 
 
-    ####################################
-    # Set tree branches
-    ####################################
-    # Tree branches
-    primaryNSpacepoints.extend(np.array(branches['NSpacepoints']))
-    primaryNuVertexSeparation.extend(np.array(branches['NuSeparation']))
-    primaryStartRegionNHits.extend(np.array(branches['VertexRegionNHits']))
-    primaryStartRegionNParticles.extend(np.array(branches['VertexRegionNParticles']))
-    primaryDCA.extend(np.array(branches['DCA']))
-    primaryConnectionExtrapDistance.extend(np.array(branches['ConnectionExtrapDistance']))
-    primaryIsPOIClosestToNu.extend(np.array(branches['IsPOIClosestToNu']))        
-    primaryClosestParentL.extend(np.array(branches['ParentConnectionDistance']))
-    primaryClosestParentT.extend(np.array(branches['ChildConnectionDistance']))
-    # Training vars
-    trainingCutDCA.extend(np.array(branches['DCA']))
-    # True
-    isTruePrimaryLink_file = np.array(branches['IsTrueLink'])
-    isTruePrimaryLink.extend(isTruePrimaryLink_file)
-    isLinkOrientationCorrect_file = np.array(branches['IsOrientationCorrect'])
-    isLinkOrientationCorrect.extend(isLinkOrientationCorrect_file)
-    # Sort out edge truth
-    this_y = np.zeros(np.array(isTruePrimaryLink_file).shape)
-    isTruePrimaryLink_bool = np.isclose(isTruePrimaryLink_file, np.ones(isTruePrimaryLink_file.shape), rtol=0.001)
-    isLinkOrientationCorrect_bool = np.isclose(isLinkOrientationCorrect_file, np.ones(isLinkOrientationCorrect_file.shape), rtol=0.001)
-    this_y[np.logical_and(isTruePrimaryLink_bool, isLinkOrientationCorrect_bool)] = 1
-    this_y[np.logical_and(isTruePrimaryLink_bool, np.logical_not(isLinkOrientationCorrect_bool))] = 2
-    y.extend(this_y)
+        # Prepare output
+        variables = primaryNSpacepoints.reshape(nEntries, 1)
+        
+        for i in range(nLinks) :
+            edge_vars = np.concatenate((primaryNuVertexSeparation[:, i].reshape(nEntries, 1), \
+                                        primaryStartRegionNHits[:, i].reshape(nEntries, 1), \
+                                        primaryStartRegionNParticles[:, i].reshape(nEntries, 1), \
+                                        primaryDCA[:, i].reshape(nEntries, 1), \
+                                        primaryConnectionExtrapDistance[:, i].reshape(nEntries, 1), \
+                                        primaryIsPOIClosestToNu[:, i].reshape(nEntries, 1), \
+                                        primaryClosestParentL[:, i].reshape(nEntries, 1), \
+                                        primaryClosestParentT[:, i].reshape(nEntries, 1)), axis=1)
             
-    ###################################
-    # Now turn things into numpy arrays
-    ###################################
-    primaryNSpacepoints = np.array(primaryNSpacepoints, dtype='float64')
-    primaryNuVertexSeparation = np.array(primaryNuVertexSeparation, dtype='float64')
-    primaryStartRegionNHits = np.array(primaryStartRegionNHits, dtype='float64')
-    primaryStartRegionNParticles = np.array(primaryStartRegionNParticles, dtype='float64')
-    primaryDCA = np.array(primaryDCA, dtype='float64')
-    primaryConnectionExtrapDistance = np.array(primaryConnectionExtrapDistance, dtype='float64')
-    primaryIsPOIClosestToNu = np.array(primaryIsPOIClosestToNu, dtype='int')
-    primaryClosestParentL = np.array(primaryClosestParentL, dtype='float64')
-    primaryClosestParentT = np.array(primaryClosestParentT, dtype='float64')
-    # Truth
-    isTruePrimaryLink = np.array(isTruePrimaryLink)
-    isLinkOrientationCorrect = np.array(isLinkOrientationCorrect)
-    y = np.array(y)
-        
-    ###################################
-    # How many links do we have?
-    ###################################        
-    nLinks = isTruePrimaryLink.shape[0]   
-    print('We have ', str(nLinks), ' to train on!')        
-          
-    ###################################
-    # Normalise variables
-    ###################################
-    if (normalise) :
-        Normalise.normaliseXAxis(primaryNSpacepoints, Normalise.primaryNSpacepoints_min, Normalise.primaryNSpacepoints_max)    
-        Normalise.normaliseXAxis(primaryNuVertexSeparation, Normalise.primaryNuVertexSeparation_min, Normalise.primaryNuVertexSeparation_max)    
-        Normalise.normaliseXAxis(primaryStartRegionNHits, Normalise.primaryStartRegionNHits_min, Normalise.primaryStartRegionNHits_max)    
-        Normalise.normaliseXAxis(primaryStartRegionNParticles, Normalise.primaryStartRegionNParticles_min, Normalise.primaryStartRegionNParticles_max)    
-        Normalise.normaliseXAxis(primaryDCA, Normalise.primaryDCA_min, Normalise.primaryDCA_max)
-        Normalise.normaliseXAxis(primaryConnectionExtrapDistance, Normalise.primaryConnectionExtrapDistance_min, Normalise.primaryConnectionExtrapDistance_max) 
-        Normalise.normaliseXAxis(primaryClosestParentL, Normalise.primaryClosestParentL_min, Normalise.primaryClosestParentL_max) 
-        Normalise.normaliseXAxis(primaryClosestParentT, Normalise.primaryClosestParentT_min, Normalise.primaryClosestParentT_max) 
-        
-    ###################################
-    # Concatenate
-    ###################################
-    variables = np.concatenate((primaryNSpacepoints.reshape(nLinks, 1), \
-                           primaryNuVertexSeparation.reshape(nLinks, 1), \
-                           primaryStartRegionNHits.reshape(nLinks, 1), \
-                           primaryStartRegionNParticles.reshape(nLinks, 1), \
-                           primaryDCA.reshape(nLinks, 1), \
-                           primaryConnectionExtrapDistance.reshape(nLinks, 1), \
-                           primaryIsPOIClosestToNu.reshape(nLinks, 1), \
-                           primaryClosestParentL.reshape(nLinks, 1), \
-                           primaryClosestParentT.reshape(nLinks, 1)), axis=1)    
+            variables = np.concatenate((variables, edge_vars), axis=1)
+            
+    return nEntries, variables, y, isTruePrimaryLink, trainingCutDCA    
 
-    return nLinks, variables, y, isTruePrimaryLink, isLinkOrientationCorrect, trainingCutDCA
+############################################################################################################################################ 
 
-############################################################################################################################################
-############################################################################################################################################        
-   
-
+def ReadTreeForValidation(isTrackMode, fileName, normalise) :
     
+    if (isTrackMode) :
+        nLinks = 2
+        treeName = "PrimaryTrackTree"
+    else :
+        nLinks = 1
+        treeName = "PrimaryShowerTree"
+    
+    with uproot.open(f"{fileName}:{treeName}") as tree:    
+
+        branches = tree.arrays()
+
+        # ID
+        particleID = np.array(branches["ParticleID"]).reshape(-1, nLinks)
+        # Vars (put astype as they are in tree)
+        primaryNSpacepoints = np.array(branches['NSpacepoints']).astype('float64').reshape(-1, nLinks)
+        primaryNuVertexSeparation = np.array(branches['NuSeparation']).astype('float64').reshape(-1, nLinks)
+        primaryStartRegionNHits = np.array(branches['VertexRegionNHits']).astype('float64').reshape(-1, nLinks)            
+        primaryStartRegionNParticles = np.array(branches['VertexRegionNParticles']).astype('float64').reshape(-1, nLinks)            
+        primaryDCA = np.array(branches['DCA']).astype('float64').reshape(-1, nLinks)            
+        primaryConnectionExtrapDistance = np.array(branches['ConnectionExtrapDistance']).astype('float64').reshape(-1, nLinks)
+        primaryIsPOIClosestToNu = np.array(branches['IsPOIClosestToNu']).astype('float64').reshape(-1, nLinks)
+        primaryClosestParentL = np.array(branches['ParentConnectionDistance']).astype('float64').reshape(-1, nLinks)
+        primaryClosestParentT = np.array(branches['ChildConnectionDistance']).astype('float64').reshape(-1, nLinks)
+        # True
+        trueVisibleGeneration = np.array(branches["TrueVisibleGeneration"]).reshape(-1, nLinks)
+        trueVisibleParentID = np.array(branches['TrueVisibleParentID']).reshape(-1, nLinks)
+        truePDG = np.array(branches['TruePDG']).reshape(-1, nLinks)
+
+        # Reduce parent-child relationship vars to 1D arrays
+        particleID = particleID[:,0]
+        primaryNSpacepoints = primaryNSpacepoints[:,0]
+        trueVisibleGeneration = trueVisibleGeneration[:,0]
+        trueVisibleParentID = trueVisibleParentID[:,0]
+        truePDG = truePDG[:,0]
+
+        # How many entries do we have?      
+        nEntries = particleID.shape[0]   
+        print('We have ', str(nEntries), ' entries to train on!')
+
+        if (normalise) :
+            Utilities.normaliseXAxis(primaryNSpacepoints, Utilities.primaryNSpacepoints_min, Utilities.primaryNSpacepoints_max)    
+            Utilities.normaliseXAxis(primaryNuVertexSeparation, Utilities.primaryNuVertexSeparation_min, Utilities.primaryNuVertexSeparation_max)    
+            Utilities.normaliseXAxis(primaryStartRegionNHits, Utilities.primaryStartRegionNHits_min, Utilities.primaryStartRegionNHits_max)    
+            Utilities.normaliseXAxis(primaryStartRegionNParticles, Utilities.primaryStartRegionNParticles_min, Utilities.primaryStartRegionNParticles_max)    
+            Utilities.normaliseXAxis(primaryDCA, Utilities.primaryDCA_min, Utilities.primaryDCA_max)
+            Utilities.normaliseXAxis(primaryConnectionExtrapDistance, Utilities.primaryConnectionExtrapDistance_min, Utilities.primaryConnectionExtrapDistance_max)
+            Utilities.normaliseXAxis(primaryClosestParentL, Utilities.primaryClosestParentL_min, Utilities.primaryClosestParentL_max) 
+            Utilities.normaliseXAxis(primaryClosestParentT, Utilities.primaryClosestParentT_min, Utilities.primaryClosestParentT_max) 
+
+        # Prepare output
+        variables = primaryNSpacepoints.reshape(nEntries, 1)
+        
+        for i in range(nLinks) :
+            edge_vars = np.concatenate((primaryNuVertexSeparation[:, i].reshape(nEntries, 1), \
+                                        primaryStartRegionNHits[:, i].reshape(nEntries, 1), \
+                                        primaryStartRegionNParticles[:, i].reshape(nEntries, 1), \
+                                        primaryDCA[:, i].reshape(nEntries, 1), \
+                                        primaryConnectionExtrapDistance[:, i].reshape(nEntries, 1), \
+                                        primaryIsPOIClosestToNu[:, i].reshape(nEntries, 1), \
+                                        primaryClosestParentL[:, i].reshape(nEntries, 1), \
+                                        primaryClosestParentT[:, i].reshape(nEntries, 1)), axis=1)
+            
+            variables = np.concatenate((variables, edge_vars), axis=1)
+            
+    return nEntries, variables, particleID, trueVisibleGeneration, trueVisibleParentID, truePDG
