@@ -11,28 +11,43 @@ def ReadTreeForTraining(isTrackMode, fileName, normalise) :
     
     if (isTrackMode) :
         nLinks = 2
-        treeName = "PrimaryTrackTree_TRAIN"
+        treeName = "PrimaryTrackTree"
     else :
         nLinks = 1
-        treeName = "PrimaryShowerTree_TRAIN"
+        treeName = "PrimaryShowerTree"
     
     with uproot.open(f"{fileName}:{treeName}") as tree:    
 
         branches = tree.arrays()
 
         # Vars (put astype as they are in tree)
-        primaryNSpacepoints = np.array(branches['NSpacepoints']).astype('float64').reshape(-1, nLinks)
-        primaryNuVertexSeparation = np.array(branches['NuSeparation']).astype('float64').reshape(-1, nLinks)
-        primaryStartRegionNHits = np.array(branches['VertexRegionNHits']).astype('float64').reshape(-1, nLinks)            
-        primaryStartRegionNParticles = np.array(branches['VertexRegionNParticles']).astype('float64').reshape(-1, nLinks)            
-        primaryDCA = np.array(branches['DCA']).astype('float64').reshape(-1, nLinks)            
-        primaryConnectionExtrapDistance = np.array(branches['ConnectionExtrapDistance']).astype('float64').reshape(-1, nLinks)
-        primaryIsPOIClosestToNu = np.array(branches['IsPOIClosestToNu']).astype('float64').reshape(-1, nLinks)
-        primaryClosestParentL = np.array(branches['ParentConnectionDistance']).astype('float64').reshape(-1, nLinks)
-        primaryClosestParentT = np.array(branches['ChildConnectionDistance']).astype('float64').reshape(-1, nLinks)
+        primaryNSpacepoints = np.array(branches['NSpacepoints']).astype('float64')
+        primaryNuVertexSeparation = np.array(branches['NuSeparation']).astype('float64')
+        primaryStartRegionNHits = np.array(branches['VertexRegionNHits']).astype('float64')            
+        primaryStartRegionNParticles = np.array(branches['VertexRegionNParticles']).astype('float64')            
+        primaryDCA = np.array(branches['DCA']).astype('float64')            
+        primaryConnectionExtrapDistance = np.array(branches['ConnectionExtrapDistance']).astype('float64')
+        primaryIsPOIClosestToNu = np.array(branches['IsPOIClosestToNu']).astype('float64')
+        primaryClosestParentL = np.array(branches['ParentConnectionDistance']).astype('float64')
+        primaryClosestParentT = np.array(branches['ChildConnectionDistance']).astype('float64')
         # True
-        isTruePrimaryLink = np.array(branches['IsTrueLink']).astype('int').reshape(-1, nLinks)
-        isLinkOrientationCorrect = np.array(branches['IsOrientationCorrect']).astype('int').reshape(-1, nLinks)    
+        isTruePrimaryLink = np.array(branches['IsTrueLink']).astype('int')
+        isLinkOrientationCorrect = np.array(branches['IsOrientationCorrect']).astype('int')    
+        # isTraining
+        isTrainingLink = np.array(branches['IsTrainingLink']).astype('int')
+        
+        # Pick out training links and reshape
+        primaryNSpacepoints = primaryNSpacepoints[isTrainingLink == 1].reshape(-1, nLinks)
+        primaryNuVertexSeparation = primaryNuVertexSeparation[isTrainingLink == 1].reshape(-1, nLinks)
+        primaryStartRegionNHits = primaryStartRegionNHits[isTrainingLink == 1].reshape(-1, nLinks)
+        primaryStartRegionNParticles = primaryStartRegionNParticles[isTrainingLink == 1].reshape(-1, nLinks)
+        primaryDCA = primaryDCA[isTrainingLink == 1].reshape(-1, nLinks)
+        primaryConnectionExtrapDistance = primaryConnectionExtrapDistance[isTrainingLink == 1].reshape(-1, nLinks)
+        primaryIsPOIClosestToNu = primaryIsPOIClosestToNu[isTrainingLink == 1].reshape(-1, nLinks)
+        primaryClosestParentL = primaryClosestParentL[isTrainingLink == 1].reshape(-1, nLinks)
+        primaryClosestParentT = primaryClosestParentT[isTrainingLink == 1].reshape(-1, nLinks)
+        isTruePrimaryLink = isTruePrimaryLink[isTrainingLink == 1].reshape(-1, nLinks)
+        isLinkOrientationCorrect = isLinkOrientationCorrect[isTrainingLink == 1].reshape(-1, nLinks)
         
         # Form link truth (this will not be used in isTrackMode == False)
         y = np.zeros(isTruePrimaryLink.shape).astype('int')
