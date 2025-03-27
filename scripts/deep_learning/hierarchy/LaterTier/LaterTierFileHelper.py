@@ -10,46 +10,79 @@ def ReadTreeForTraining(isTrackMode, fileName, normalise) :
         
     if (isTrackMode) :
         nLinks = 4
-        treeName = "LaterTierTrackTrackTree_TRAIN"
+        treeName = "LaterTierTrackTrackTree"
     else :
         nLinks = 2
-        treeName = "LaterTierTrackShowerTree_TRAIN"
+        treeName = "LaterTierTrackShowerTree"
     
     with uproot.open(f"{fileName}:{treeName}") as tree:
 
         branches = tree.arrays()
 
         # Vars (put astype as they are in tree)
-        parentTrackScore = np.array(branches['ParentTrackScore']).astype('float64').reshape(-1, nLinks)            
-        childTrackScore = np.array(branches['ChildTrackScore']).astype('float64').reshape(-1, nLinks)
-        parentNSpacepoints = np.array(branches['ParentNSpacepoints']).astype('float64').reshape(-1, nLinks)
-        childNSpacepoints = np.array(branches['ChildNSpacepoints']).astype('float64').reshape(-1, nLinks)
-        separation3D = np.array(branches['Separation3D']).astype('float64').reshape(-1, nLinks)
-        parentNuVertexSep = np.array(branches['ParentNuVertexSep']).astype('float64').reshape(-1, nLinks)
-        childNuVertexSep = np.array(branches['ChildNuVertexSep']).astype('float64').reshape(-1, nLinks)                        
-        parentEndRegionNHits = np.array(branches['ParentEndRegionNHits']).astype('float64').reshape(-1, nLinks)
-        parentEndRegionNParticles = np.array(branches['ParentEndRegionNParticles']).astype('float64').reshape(-1, nLinks)
-        parentEndRegionRToWall = np.array(branches['ParentEndRegionRToWall']).astype('float64').reshape(-1, nLinks)
-        vertexSeparation = np.array(branches['VertexSeparation']).astype('float64').reshape(-1, nLinks)        
-        doesChildConnect = np.array(branches['DoesChildConnect']).astype('float64').reshape(-1, nLinks)
-        overshootStartDCA = np.array(branches['OvershootStartDCA']).astype('float64').reshape(-1, nLinks)
-        overshootStartL = np.array(branches['OvershootStartL']).astype('float64').reshape(-1, nLinks)
-        overshootEndDCA = np.array(branches['OvershootEndDCA']).astype('float64').reshape(-1, nLinks)
-        overshootEndL = np.array(branches['OvershootEndL']).astype('float64').reshape(-1, nLinks)
-        childConnectionDCA = np.array(branches['ChildCPDCA']).astype('float64').reshape(-1, nLinks)
-        childConnectionExtrapDistance = np.array(branches['ChildCPExtrapDistance']).astype('float64').reshape(-1, nLinks)
-        childConnectionLRatio = np.array(branches['ChildCPLRatio']).astype('float64').reshape(-1, nLinks)
-        parentConnectionPointNUpstreamHits = np.array(branches['ParentCPNUpstreamHits']).astype('float64').reshape(-1, nLinks)
-        parentConnectionPointNDownstreamHits = np.array(branches['ParentCPNDownstreamHits']).astype('float64').reshape(-1, nLinks)
-        parentConnectionPointNHitRatio = np.array(branches['ParentCPNHitRatio']).astype('float64').reshape(-1, nLinks)
-        parentConnectionPointEigenValueRatio = np.array(branches['ParentCPEigenvalueRatio']).astype('float64').reshape(-1, nLinks)
-        parentConnectionPointOpeningAngle = np.array(branches['ParentCPOpeningAngle']).astype('float64').reshape(-1, nLinks)
-        isParentPOIClosestToNu = np.array(branches['ParentIsPOIClosestToNu']).astype('float64').reshape(-1, nLinks)
-        isChildPOIClosestToNu = np.array(branches['ChildIsPOIClosestToNu']).astype('float64').reshape(-1, nLinks)
+        parentTrackScore = np.array(branches['ParentTrackScore']).astype('float64')            
+        childTrackScore = np.array(branches['ChildTrackScore']).astype('float64')
+        parentNSpacepoints = np.array(branches['ParentNSpacepoints']).astype('float64')
+        childNSpacepoints = np.array(branches['ChildNSpacepoints']).astype('float64')
+        separation3D = np.array(branches['Separation3D']).astype('float64')
+        parentNuVertexSep = np.array(branches['ParentNuVertexSep']).astype('float64')
+        childNuVertexSep = np.array(branches['ChildNuVertexSep']).astype('float64')                        
+        parentEndRegionNHits = np.array(branches['ParentEndRegionNHits']).astype('float64')
+        parentEndRegionNParticles = np.array(branches['ParentEndRegionNParticles']).astype('float64')
+        parentEndRegionRToWall = np.array(branches['ParentEndRegionRToWall']).astype('float64')
+        vertexSeparation = np.array(branches['VertexSeparation']).astype('float64')        
+        doesChildConnect = np.array(branches['DoesChildConnect']).astype('float64')
+        overshootStartDCA = np.array(branches['OvershootStartDCA']).astype('float64')
+        overshootStartL = np.array(branches['OvershootStartL']).astype('float64')
+        overshootEndDCA = np.array(branches['OvershootEndDCA']).astype('float64')
+        overshootEndL = np.array(branches['OvershootEndL']).astype('float64')
+        childConnectionDCA = np.array(branches['ChildCPDCA']).astype('float64')
+        childConnectionExtrapDistance = np.array(branches['ChildCPExtrapDistance']).astype('float64')
+        childConnectionLRatio = np.array(branches['ChildCPLRatio']).astype('float64')
+        parentConnectionPointNUpstreamHits = np.array(branches['ParentCPNUpstreamHits']).astype('float64')
+        parentConnectionPointNDownstreamHits = np.array(branches['ParentCPNDownstreamHits']).astype('float64')
+        parentConnectionPointNHitRatio = np.array(branches['ParentCPNHitRatio']).astype('float64')
+        parentConnectionPointEigenValueRatio = np.array(branches['ParentCPEigenvalueRatio']).astype('float64')
+        parentConnectionPointOpeningAngle = np.array(branches['ParentCPOpeningAngle']).astype('float64')
+        isParentPOIClosestToNu = np.array(branches['ParentIsPOIClosestToNu']).astype('float64')
+        isChildPOIClosestToNu = np.array(branches['ChildIsPOIClosestToNu']).astype('float64')
         # Truth
-        trueParentChildLink = np.array(branches['IsTrueLink']).astype('int').reshape(-1, nLinks)                        # int
-        trueChildVisibleGeneration = np.array(branches['ChildTrueVisibleGeneration']).astype('int').reshape(-1, nLinks) # int
-        isLinkOrientationCorrect = np.array(branches['IsOrientationCorrect']).astype('int').reshape(-1, nLinks)         # int
+        trueParentChildLink = np.array(branches['IsTrueLink']).astype('int')                        # int
+        trueChildVisibleGeneration = np.array(branches['ChildTrueVisibleGeneration']).astype('int') # int
+        isLinkOrientationCorrect = np.array(branches['IsOrientationCorrect']).astype('int')         # int
+        # isTraining        
+        isTrainingLink = np.array(branches['IsTrainingLink']).astype('int')
+        
+        # Pick out training links and reshape
+        parentTrackScore = parentTrackScore[isTrainingLink == 1].reshape(-1, nLinks)
+        childTrackScore = childTrackScore[isTrainingLink == 1].reshape(-1, nLinks)
+        parentNSpacepoints = parentNSpacepoints[isTrainingLink == 1].reshape(-1, nLinks)
+        childNSpacepoints = childNSpacepoints[isTrainingLink == 1].reshape(-1, nLinks)
+        separation3D = separation3D[isTrainingLink == 1].reshape(-1, nLinks)
+        parentNuVertexSep = parentNuVertexSep[isTrainingLink == 1].reshape(-1, nLinks)
+        childNuVertexSep = childNuVertexSep[isTrainingLink == 1].reshape(-1, nLinks)
+        parentEndRegionNHits = parentEndRegionNHits[isTrainingLink == 1].reshape(-1, nLinks)
+        parentEndRegionNParticles = parentEndRegionNParticles[isTrainingLink == 1].reshape(-1, nLinks)
+        parentEndRegionRToWall = parentEndRegionRToWall[isTrainingLink == 1].reshape(-1, nLinks)
+        vertexSeparation = vertexSeparation[isTrainingLink == 1].reshape(-1, nLinks)
+        doesChildConnect = doesChildConnect[isTrainingLink == 1].reshape(-1, nLinks)
+        overshootStartDCA = overshootStartDCA[isTrainingLink == 1].reshape(-1, nLinks)
+        overshootStartL = overshootStartL[isTrainingLink == 1].reshape(-1, nLinks)
+        overshootEndDCA = overshootEndDCA[isTrainingLink == 1].reshape(-1, nLinks)
+        overshootEndL = overshootEndL[isTrainingLink == 1].reshape(-1, nLinks)
+        childConnectionDCA = childConnectionDCA[isTrainingLink == 1].reshape(-1, nLinks)
+        childConnectionExtrapDistance = childConnectionExtrapDistance[isTrainingLink == 1].reshape(-1, nLinks)
+        childConnectionLRatio = childConnectionLRatio[isTrainingLink == 1].reshape(-1, nLinks)
+        parentConnectionPointNUpstreamHits = parentConnectionPointNUpstreamHits[isTrainingLink == 1].reshape(-1, nLinks)
+        parentConnectionPointNDownstreamHits = parentConnectionPointNDownstreamHits[isTrainingLink == 1].reshape(-1, nLinks)
+        parentConnectionPointNHitRatio = parentConnectionPointNHitRatio[isTrainingLink == 1].reshape(-1, nLinks)
+        parentConnectionPointEigenValueRatio = parentConnectionPointEigenValueRatio[isTrainingLink == 1].reshape(-1, nLinks)
+        parentConnectionPointOpeningAngle = parentConnectionPointOpeningAngle[isTrainingLink == 1].reshape(-1, nLinks)
+        isParentPOIClosestToNu = isParentPOIClosestToNu[isTrainingLink == 1].reshape(-1, nLinks)
+        isChildPOIClosestToNu = isChildPOIClosestToNu[isTrainingLink == 1].reshape(-1, nLinks)
+        trueParentChildLink = trueParentChildLink[isTrainingLink == 1].reshape(-1, nLinks)
+        trueChildVisibleGeneration = trueChildVisibleGeneration[isTrainingLink == 1].reshape(-1, nLinks)
+        isLinkOrientationCorrect = isLinkOrientationCorrect[isTrainingLink == 1].reshape(-1, nLinks)
         
         # Form link truth
         y = np.zeros(trueParentChildLink.shape).astype('int')
@@ -57,8 +90,8 @@ def ReadTreeForTraining(isTrackMode, fileName, normalise) :
         y[np.logical_and(trueParentChildLink,  np.logical_not(isLinkOrientationCorrect))] = 2
 
         # Training cuts!
-        trainingCutL = np.array(branches['TrainingCutL']).astype('float64').reshape(-1, nLinks)
-        trainingCutT = np.array(branches['TrainingCutT']).astype('float64').reshape(-1, nLinks)
+        trainingCutL = np.array(branches['TrainingCutL']).astype('float64')[isTrainingLink == 1].reshape(-1, nLinks)
+        trainingCutT = np.array(branches['TrainingCutT']).astype('float64')[isTrainingLink == 1].reshape(-1, nLinks)
         trainingCutSep = copy.deepcopy(separation3D)
         trainingCutDoesConnect = np.isclose(doesChildConnect, 1.0).astype('int')
         
