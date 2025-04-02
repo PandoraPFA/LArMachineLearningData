@@ -96,6 +96,14 @@ then
     download "13oGLdQKE5tFuvh2c0_06xwU8-8qjUQxH" "PandoraNet_SecVertex_DUNEFD_HD_Accel_1_U_v04_13_00.pt"
     download "1fmDwr9kJ5RNfIl3u3Dq5P9T5mIy3_ZbB" "PandoraNet_SecVertex_DUNEFD_HD_Accel_1_V_v04_13_00.pt"
     download "1XOLRg-xydjPx-7i7OCsk88dRzpCgrMyN" "PandoraNet_SecVertex_DUNEFD_HD_Accel_1_W_v04_13_00.pt"
+
+    download "1Kvo8A0fWA7521ywTQ8JWFs8MFRRbss0d" "PandoraNet_Hierarchy_DUNEFD_HD_S_Class_v014_15_00.pt"
+    download "1GX9xmA4ECMWUK584yIdMZV0ZJsST7kVx" "PandoraNet_Hierarchy_DUNEFD_HD_T_Class_v014_15_00.pt"
+    download "170onYjTWoqouWOXjBmYDglc0x_bRGX9G" "PandoraNet_Hierarchy_DUNEFD_HD_T_Edge_v014_15_00.pt"
+    download "15pKwjsy6ms9YxD3_wk2hZx_qF-RFswqu" "PandoraNet_Hierarchy_DUNEFD_HD_TS_Class_v014_15_00.pt"
+    download "115_FD4SBYyVCXORTByPHbzymNkEgrGpf" "PandoraNet_Hierarchy_DUNEFD_HD_TS_Edge_v014_15_00.pt"
+    download "1oX9JeGvi_hk6BMB1MbGFwddeiXztSeVp" "PandoraNet_Hierarchy_DUNEFD_HD_TT_Class_v014_15_00.pt"
+    download "15uQbdDub85_3cvFvO8YL-y_0cRoqHWq9" "PandoraNet_Hierarchy_DUNEFD_HD_TT_Edge_v014_15_00.pt"
   fi
 
   if [[ "$2" == "atmos" ]]
