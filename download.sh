@@ -54,7 +54,7 @@ cd $MY_TEST_AREA/LArMachineLearningData/PandoraMVAs
 # SBND
 if [[ "$1" == "sbnd" ]]
 then
-  curl_download "fQZBRi1kiWvrJG2" "PandoraBdt_v09_67_00_SBND.xml"
+  download "fQZBRi1kiWvrJG2" "PandoraBdt_v09_67_00_SBND.xml"
 fi
 
 ### PandoraNetworkData
