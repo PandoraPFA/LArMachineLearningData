@@ -17,8 +17,8 @@ pandora_run_script_path: "/storage/epp2/phsajw/bondora/LArMachineLearningData/sc
 aggregate_validations_script_path: "/storage/epp2/phsajw/bondora/LArMachineLearningData/scripts/bondora/scripts/aggregate_validations_trackpuritycompleteness.sh" # Aggregate and extract average metrics from the validation ROOT files
 result_parser: "track_purity_completeness" # Derived class in 'results_parsers.py' to convert aggregated metrics into a single objective value
 sampler: "gp" # Type of sample: 'gp' is gaussian process (Bayesian Optimisation), 'random' is random sampling (calculating paramter importance)
-n_processes: 2 # Number of parallel pandora processes
-n_files_total: 2 # Number of files to process
+n_processes: 47 # Number of parallel pandora processes
+n_files_total: 600 # Number of files to process
 expected_single_file_process_time: 30 # Used to define a cut off time for a pandora process
 n_files_per_process: 1 # Number of .pndr files each pandora process runs on
 sampler_seed: 1 # Seed to pass to the sampler
@@ -119,8 +119,8 @@ search_space: # Define the search space of the optimisation
     - 10
     - 30
     - null
-n_trials: 3 # Number of trials including startup trials
-n_startup_trials: 1 # Number of startup trials, these are random samples to "warm up" the Gaussian process
+n_trials: 410 # Number of trials including startup trials
+n_startup_trials: 10 # Number of startup trials, these are random samples to "warm up" the Gaussian process
 initial_param_point: # If not null, first config parameters to sample. I set this to the default parameters so impact of the optimisation can be easily analysed.
   LArLongitudinalExtension/EmissionMaxLongitudinalDisplacement: 15.0
   LArClusteringParent/LArTrackClusterCreation/MaxCaloHitSeparation: 1.4
