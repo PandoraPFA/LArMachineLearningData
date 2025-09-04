@@ -1,0 +1,284 @@
+<pandora>
+    <!-- GLOBAL SETTINGS -->
+    <IsMonitoringEnabled>true</IsMonitoringEnabled>
+    <ShouldDisplayAlgorithmInfo>false</ShouldDisplayAlgorithmInfo>
+    <SingleHitTypeClusteringMode>true</SingleHitTypeClusteringMode>
+
+    <algorithm type = "LArPreProcessing">
+        <OutputCaloHitListNameU>CaloHitListU</OutputCaloHitListNameU>
+        <OutputCaloHitListNameV>CaloHitListV</OutputCaloHitListNameV>
+        <OutputCaloHitListNameW>CaloHitListW</OutputCaloHitListNameW>
+        <FilteredCaloHitListName>CaloHitList2D</FilteredCaloHitListName>
+        <CurrentCaloHitListReplacement>CaloHitList2D</CurrentCaloHitListReplacement>
+    </algorithm>
+
+    <!-- TwoDReconstruction -->
+    <algorithm type = "LArClusteringParent">
+        <algorithm type = "LArTrackClusterCreation" description = "ClusterFormation">
+            <MergeBackFilteredHits>true</MergeBackFilteredHits>
+            <MaxGapLayers>2</MaxGapLayers>
+            <MaxCaloHitSeparation>1.4</MaxCaloHitSeparation>
+            <MinCaloHitSeparation>0.4</MinCaloHitSeparation>
+            <CloseSeparation>0.9</CloseSeparation>
+            <MinMipFraction>0.0</MinMipFraction>
+        </algorithm>
+        <InputCaloHitListName>CaloHitListU</InputCaloHitListName>
+        <ClusterListName>ClustersU</ClusterListName>
+        <ReplaceCurrentCaloHitList>true</ReplaceCurrentCaloHitList>
+        <ReplaceCurrentClusterList>true</ReplaceCurrentClusterList>
+    </algorithm>
+    <algorithm type = "LArLayerSplitting">
+        <MinClusterLayers>20</MinClusterLayers>
+        <LayerWindow>10</LayerWindow>
+        <MaxScatterRms>0.35</MaxScatterRms>
+        <MaxScatterCosTheta>0.5</MaxScatterCosTheta>
+        <MaxSlidingCosTheta>0.866</MaxSlidingCosTheta>
+    </algorithm>
+    <algorithm type = "LArLongitudinalAssociation">
+        <MinClusterLayers>4</MinClusterLayers>
+        <MaxGapLayers>7</MaxGapLayers>
+        <FitLayers>30</FitLayers>
+        <MaxGapDistanceSquared>10.0</MaxGapDistanceSquared>
+        <MinCosRelativeAngle>0.985</MinCosRelativeAngle>
+        <MaxTransverseDisplacement>2.0</MaxTransverseDisplacement>
+        <MaxLongitudinalDisplacement>2.0</MaxLongitudinalDisplacement>
+    </algorithm>
+    <algorithm type = "LArTransverseAssociation">
+        <FirstLengthCut>1.5</FirstLengthCut>
+        <SecondLengthCut>7.5</SecondLengthCut>
+        <ClusterWindow>3.0</ClusterWindow>
+        <clusterAngle>45.0</clusterAngle>
+        <MaxTransverseOverlap>0.5</MaxTransverseOverlap>
+        <MaxProjectedOverlap>1.0</MaxProjectedOverlap>
+        <MaxLongitudinalOverlap>1.5</MaxLongitudinalOverlap>
+        <TransverseClusterMinCosTheta>0.866</TransverseClusterMinCosTheta>
+        <TransverseClusterMinLength>0.5</TransverseClusterMinLength>
+        <TransverseClusterMaxDisplacement>1.5</TransverseClusterMaxDisplacement>
+    </algorithm>
+    <algorithm type = "LArLongitudinalExtension">
+        <ClusterMinLength>5.0</ClusterMinLength>
+        <ClusterMinLayerOccupancy>0.75</ClusterMinLayerOccupancy>
+        <NodeMaxDisaplacement>1.5</NodeMaxDisaplacement>
+        <NodeMaxCosRelativeAngle>0.906</NodeMaxCosRelativeAngle>
+        <EmissionMaxLongitudinalDisplacement>15.0</EmissionMaxLongitudinalDisplacement>
+        <EmissionMaxTransverseDisplacement>2.5</EmissionMaxTransverseDisplacement>
+        <EmissionMaxCosRelativeAngle>0.985</EmissionMaxCosRelativeAngle>
+    </algorithm>
+    <algorithm type = "LArTransverseExtension">
+        <MinClusterLength>0.5</MinClusterLength>
+        <MaxLongitudinalDisplacement>10.0</MaxLongitudinalDisplacement>
+        <MaxTransverseDisplacement>1.0</MaxTransverseDisplacement>
+    </algorithm>
+    <algorithm type = "LArCrossGapsAssociation">
+        <MinClusterHits>10</MinClusterHits>
+        <MinClusterLayers>6</MinClusterLayers>
+        <SlidingFitWindow>20</SlidingFitWindow>
+        <MaxSamplingPoints>100</MaxSamplingPoints>
+        <SampleStepSize>0.5</SampleStepSize>
+        <MaxUnmatchedSampleRun>8</MaxUnmatchedSampleRun>
+        <MaxOnClusterDistance>1.5</MaxOnClusterDistance>
+        <MinMatchedSamplingPoints>10</MinMatchedSamplingPoints>
+        <MinMatchedSamplingFraction>0.5</MinMatchedSamplingFraction>
+        <GapTolerance>0.0</GapTolerance>
+    </algorithm>
+    <algorithm type = "LArCrossGapsExtension">
+        <MinClusterLength>5.0</MinClusterLength>
+        <MinGapFraction>0.5</MinGapFraction>
+        <MaxGapTolerance>2.0</MaxGapTolerance>
+        <MaxTransverseDisplacement>2.5</MaxTransverseDisplacement>
+        <MaxRelativeAngle>10.0</MaxRelativeAngle>
+    </algorithm>
+    <algorithm type = "LArOvershootSplitting">
+        <MinClusterLength>5.0</MinClusterLength>
+        <MaxClusterSeparation>5.0</MaxClusterSeparation>
+        <MinVertexDisplacement>2.0</MinVertexDisplacement>
+        <MaxIntersectDisplacement>1.5</MaxIntersectDisplacement>
+        <MinSplitDisplacement>10.0</MinSplitDisplacement>
+        <SlidingFitHalfWindow>15</SlidingFitHalfWindow>
+    </algorithm>
+    <algorithm type = "LArBranchSplitting">
+        <MaxTransverseDisplacement>1.5</MaxTransverseDisplacement>
+        <MaxLongitudinalDisplacement>10.0</MaxLongitudinalDisplacement>
+        <MinLongitudinalExtension>3.0</MinLongitudinalExtension>
+        <MinCosRelativeAngle>0.966</MinCosRelativeAngle>
+        <ProjectionAngularAllowance>20.0</ProjectionAngularAllowance>
+        <ShortHalfWindowLayers>10</ShortHalfWindowLayers>
+        <LongHalfWindowLayers>20</LongHalfWindowLayers>
+        <MinClusterLength>7.5</MinClusterLength>
+        <VetoDisplacement>1.5</VetoDisplacement>
+    </algorithm>
+    <algorithm type = "LArKinkSplitting">
+        <MaxScatterRms>0.2</MaxScatterRms>
+        <MaxScatterCosTheta>0.905</MaxScatterCosTheta>
+        <MaxSlidingCosTheta>0.985</MaxSlidingCosTheta>
+        <SlidingFitHalfWindow>20</SlidingFitHalfWindow>
+        <MinClusterLength>10.0</MinClusterLength>
+    </algorithm>
+    <algorithm type = "LArTrackConsolidation">
+        <algorithm type = "LArSimpleClusterCreation" description = "ClusterRebuilding"/>
+        <MaxTransverseDisplacement>1.0</MaxTransverseDisplacement>
+        <MinAssociatedSpan>1.0</MinAssociatedSpan>
+        <MinAssociatedFraction>0.5</MinAssociatedFraction>
+        <MinTrackLength>7.5</MinTrackLength>
+        <MaxClusterLength>15.0</MaxClusterLength>
+        <HalfWindowLayers>25</HalfWindowLayers>
+    </algorithm>
+    <algorithm type = "LArHitWidthClusterMerging">
+        <MaxConstituentHitWidth>0.5</MaxConstituentHitWidth>
+        <HitWidthScalingFactor>1.0</HitWidthScalingFactor>
+        <FittingWidth>20.0</FittingWidth>
+        <MinClusterWeight>0.5</MinClusterWeight>
+        <MaxXMergeDistance>5.0</MaxXMergeDistance>
+        <MaxZMergeDistance>2.0</MaxZMergeDistance>
+        <MinMergeCosOpeningAngle>0.97</MinMergeCosOpeningAngle>
+        <MinDirectionDeviationCosAngle>0.9</MinDirectionDeviationCosAngle>
+        <MinClusterSparseness>0.3</MinClusterSparseness>
+    </algorithm>
+
+    <algorithm type = "LArClusteringParent">
+        <algorithm type = "LArTrackClusterCreation" description = "ClusterFormation">
+            <MergeBackFilteredHits>true</MergeBackFilteredHits>
+            <MaxGapLayers>2</MaxGapLayers>
+            <MaxCaloHitSeparation>1.4</MaxCaloHitSeparation>
+            <MinCaloHitSeparation>0.4</MinCaloHitSeparation>
+            <CloseSeparation>0.9</CloseSeparation>
+            <MinMipFraction>0.0</MinMipFraction>
+        </algorithm>
+        <InputCaloHitListName>CaloHitListV</InputCaloHitListName>
+        <ClusterListName>ClustersV</ClusterListName>
+        <ReplaceCurrentCaloHitList>true</ReplaceCurrentCaloHitList>
+        <ReplaceCurrentClusterList>true</ReplaceCurrentClusterList>
+    </algorithm>
+    <algorithm type = "LArLayerSplitting">
+        <MinClusterLayers>20</MinClusterLayers>
+        <LayerWindow>10</LayerWindow>
+        <MaxScatterRms>0.35</MaxScatterRms>
+        <MaxScatterCosTheta>0.5</MaxScatterCosTheta>
+        <MaxSlidingCosTheta>0.866</MaxSlidingCosTheta>
+    </algorithm>
+    <algorithm type = "LArLongitudinalAssociation">
+        <MinClusterLayers>4</MinClusterLayers>
+        <MaxGapLayers>7</MaxGapLayers>
+        <FitLayers>30</FitLayers>
+        <MaxGapDistanceSquared>10.0</MaxGapDistanceSquared>
+        <MinCosRelativeAngle>0.985</MinCosRelativeAngle>
+        <MaxTransverseDisplacement>2.0</MaxTransverseDisplacement>
+        <MaxLongitudinalDisplacement>2.0</MaxLongitudinalDisplacement>
+    </algorithm>
+    <algorithm type = "LArTransverseAssociation">
+        <FirstLengthCut>1.5</FirstLengthCut>
+        <SecondLengthCut>7.5</SecondLengthCut>
+        <ClusterWindow>3.0</ClusterWindow>
+        <clusterAngle>45.0</clusterAngle>
+        <MaxTransverseOverlap>0.5</MaxTransverseOverlap>
+        <MaxProjectedOverlap>1.0</MaxProjectedOverlap>
+        <MaxLongitudinalOverlap>1.5</MaxLongitudinalOverlap>
+        <TransverseClusterMinCosTheta>0.866</TransverseClusterMinCosTheta>
+        <TransverseClusterMinLength>0.5</TransverseClusterMinLength>
+        <TransverseClusterMaxDisplacement>1.5</TransverseClusterMaxDisplacement>
+    </algorithm>
+    <algorithm type = "LArLongitudinalExtension">
+        <ClusterMinLength>5.0</ClusterMinLength>
+        <ClusterMinLayerOccupancy>0.75</ClusterMinLayerOccupancy>
+        <NodeMaxDisaplacement>1.5</NodeMaxDisaplacement>
+        <NodeMaxCosRelativeAngle>0.906</NodeMaxCosRelativeAngle>
+        <EmissionMaxLongitudinalDisplacement>15.0</EmissionMaxLongitudinalDisplacement>
+        <EmissionMaxTransverseDisplacement>2.5</EmissionMaxTransverseDisplacement>
+        <EmissionMaxCosRelativeAngle>0.985</EmissionMaxCosRelativeAngle>
+    </algorithm>
+    <algorithm type = "LArTransverseExtension">
+        <MinClusterLength>0.5</MinClusterLength>
+        <MaxLongitudinalDisplacement>10.0</MaxLongitudinalDisplacement>
+        <MaxTransverseDisplacement>1.0</MaxTransverseDisplacement>
+    </algorithm>
+    <algorithm type = "LArCrossGapsAssociation">
+        <MinClusterHits>10</MinClusterHits>
+        <MinClusterLayers>6</MinClusterLayers>
+        <SlidingFitWindow>20</SlidingFitWindow>
+        <MaxSamplingPoints>100</MaxSamplingPoints>
+        <SampleStepSize>0.5</SampleStepSize>
+        <MaxUnmatchedSampleRun>8</MaxUnmatchedSampleRun>
+        <MaxOnClusterDistance>1.5</MaxOnClusterDistance>
+        <MinMatchedSamplingPoints>10</MinMatchedSamplingPoints>
+        <MinMatchedSamplingFraction>0.5</MinMatchedSamplingFraction>
+        <GapTolerance>0.0</GapTolerance>
+    </algorithm>
+    <algorithm type = "LArCrossGapsExtension">
+        <MinClusterLength>5.0</MinClusterLength>
+        <MinGapFraction>0.5</MinGapFraction>
+        <MaxGapTolerance>2.0</MaxGapTolerance>
+        <MaxTransverseDisplacement>2.5</MaxTransverseDisplacement>
+        <MaxRelativeAngle>10.0</MaxRelativeAngle>
+    </algorithm>
+    <algorithm type = "LArOvershootSplitting">
+        <MinClusterLength>5.0</MinClusterLength>
+        <MaxClusterSeparation>5.0</MaxClusterSeparation>
+        <MinVertexDisplacement>2.0</MinVertexDisplacement>
+        <MaxIntersectDisplacement>1.5</MaxIntersectDisplacement>
+        <MinSplitDisplacement>10.0</MinSplitDisplacement>
+        <SlidingFitHalfWindow>15</SlidingFitHalfWindow>
+    </algorithm>
+    <algorithm type = "LArBranchSplitting">
+        <MaxTransverseDisplacement>1.5</MaxTransverseDisplacement>
+        <MaxLongitudinalDisplacement>10.0</MaxLongitudinalDisplacement>
+        <MinLongitudinalExtension>3.0</MinLongitudinalExtension>
+        <MinCosRelativeAngle>0.966</MinCosRelativeAngle>
+        <ProjectionAngularAllowance>20.0</ProjectionAngularAllowance>
+        <ShortHalfWindowLayers>10</ShortHalfWindowLayers>
+        <LongHalfWindowLayers>20</LongHalfWindowLayers>
+        <MinClusterLength>7.5</MinClusterLength>
+        <VetoDisplacement>1.5</VetoDisplacement>
+    </algorithm>
+    <algorithm type = "LArKinkSplitting">
+        <MaxScatterRms>0.2</MaxScatterRms>
+        <MaxScatterCosTheta>0.905</MaxScatterCosTheta>
+        <MaxSlidingCosTheta>0.985</MaxSlidingCosTheta>
+        <SlidingFitHalfWindow>20</SlidingFitHalfWindow>
+        <MinClusterLength>10.0</MinClusterLength>
+    </algorithm>
+    <algorithm type = "LArTrackConsolidation">
+        <algorithm type = "LArSimpleClusterCreation" description = "ClusterRebuilding"/>
+        <MaxTransverseDisplacement>1.0</MaxTransverseDisplacement>
+        <MinAssociatedSpan>1.0</MinAssociatedSpan>
+        <MinAssociatedFraction>0.5</MinAssociatedFraction>
+        <MinTrackLength>7.5</MinTrackLength>
+        <MaxClusterLength>15.0</MaxClusterLength>
+        <HalfWindowLayers>25</HalfWindowLayers>
+    </algorithm>
+    <algorithm type = "LArHitWidthClusterMerging">
+        <MaxConstituentHitWidth>0.5</MaxConstituentHitWidth>
+        <HitWidthScalingFactor>1.0</HitWidthScalingFactor>
+        <FittingWidth>20.0</FittingWidth>
+        <MinClusterWeight>0.5</MinClusterWeight>
+        <MaxXMergeDistance>5.0</MaxXMergeDistance>
+        <MaxZMergeDistance>2.0</MaxZMergeDistance>
+        <MinMergeCosOpeningAngle>0.97</MinMergeCosOpeningAngle>
+        <MinDirectionDeviationCosAngle>0.9</MinDirectionDeviationCosAngle>
+        <MinClusterSparseness>0.3</MinClusterSparseness>
+    </algorithm>
+
+    <algorithm type = "LArEventClusterValidation">
+        <FileName>ClusteringValidation.root</FileName>
+        <TreeName>Event</TreeName>
+        <ClusterListNames>ClustersU ClustersV</ClusterListNames>
+        <CaloHitListNames>CaloHitListU CaloHitListV</CaloHitListNames>
+        <MinMCHitsPerView>10</MinMCHitsPerView>
+        <FoldShowers>true</FoldShowers>
+        <HandleDeltaRays>true</HandleDeltaRays>
+        <MergeShowerClustersForRandIndex>true</MergeShowerClustersForRandIndex>
+    </algorithm>
+
+    <algorithm type = "LArClusteringParent">
+        <algorithm type = "LArTrackClusterCreation" description = "ClusterFormation"/>
+        <InputCaloHitListName>CaloHitListW</InputCaloHitListName>
+        <ClusterListName>ClustersW</ClusterListName>
+        <ReplaceCurrentCaloHitList>true</ReplaceCurrentCaloHitList>
+        <ReplaceCurrentClusterList>true</ReplaceCurrentClusterList>
+    </algorithm>
+
+    <!-- Output list management -->
+    <algorithm type = "LArPostProcessing">
+        <ClusterListNames>ClustersU ClustersV ClustersW</ClusterListNames>
+        <CaloHitListNames>CaloHitListU CaloHitListV CaloHitListW CaloHitList2D</CaloHitListNames>
+    </algorithm>
+</pandora>
