@@ -24,7 +24,7 @@ source /storage/epp2/phsajw/bondora/.venv_3.9.15_optuna/bin/activate
 
 #### Prepare Pandora Build
 
-You will need a build of pandora accessible. LArContent needs to be [my fork](https://github.com/AlexWilkinsonnn/LArContent) at branch `feature/awilkins_bo` (This will be merged into LArContent soon, I will update these instructions!).
+You will need a build of pandora accessible. LArContent needs to be at tag >= v04_16_01 to have the validation algorithm Used in my optimisation studies.
 
 #### Prepare Directories
 
