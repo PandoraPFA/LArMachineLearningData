@@ -268,17 +268,9 @@
         <MergeShowerClustersForRandIndex>true</MergeShowerClustersForRandIndex>
     </algorithm>
 
-    <algorithm type = "LArClusteringParent">
-        <algorithm type = "LArTrackClusterCreation" description = "ClusterFormation"/>
-        <InputCaloHitListName>CaloHitListW</InputCaloHitListName>
-        <ClusterListName>ClustersW</ClusterListName>
-        <ReplaceCurrentCaloHitList>true</ReplaceCurrentCaloHitList>
-        <ReplaceCurrentClusterList>true</ReplaceCurrentClusterList>
-    </algorithm>
-
     <!-- Output list management -->
     <algorithm type = "LArPostProcessing">
-        <ClusterListNames>ClustersU ClustersV ClustersW</ClusterListNames>
+        <ClusterListNames>ClustersU ClustersV</ClusterListNames>
         <CaloHitListNames>CaloHitListU CaloHitListV CaloHitListW CaloHitList2D</CaloHitListNames>
     </algorithm>
 </pandora>
