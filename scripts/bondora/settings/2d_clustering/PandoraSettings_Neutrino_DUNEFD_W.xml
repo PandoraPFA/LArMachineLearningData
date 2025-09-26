@@ -14,22 +14,6 @@
 
     <!-- TwoDReconstruction -->
     <algorithm type = "LArClusteringParent">
-        <algorithm type = "LArTrackClusterCreation" description = "ClusterFormation"/>
-        <InputCaloHitListName>CaloHitListU</InputCaloHitListName>
-        <ClusterListName>ClustersU</ClusterListName>
-        <ReplaceCurrentCaloHitList>true</ReplaceCurrentCaloHitList>
-        <ReplaceCurrentClusterList>true</ReplaceCurrentClusterList>
-    </algorithm>
-
-    <algorithm type = "LArClusteringParent">
-        <algorithm type = "LArTrackClusterCreation" description = "ClusterFormation"/>
-        <InputCaloHitListName>CaloHitListV</InputCaloHitListName>
-        <ClusterListName>ClustersV</ClusterListName>
-        <ReplaceCurrentCaloHitList>true</ReplaceCurrentCaloHitList>
-        <ReplaceCurrentClusterList>true</ReplaceCurrentClusterList>
-    </algorithm>
-
-    <algorithm type = "LArClusteringParent">
         <algorithm type = "LArTrackClusterCreation" description = "ClusterFormation">
             <MergeBackFilteredHits>true</MergeBackFilteredHits>
             <MaxGapLayers>2</MaxGapLayers>
@@ -164,7 +148,7 @@
 
     <!-- Output list management -->
     <algorithm type = "LArPostProcessing">
-        <ClusterListNames>ClustersU ClustersV ClustersW</ClusterListNames>
+        <ClusterListNames>ClustersW</ClusterListNames>
         <CaloHitListNames>CaloHitListU CaloHitListV CaloHitListW CaloHitList2D</CaloHitListNames>
     </algorithm>
 </pandora>
