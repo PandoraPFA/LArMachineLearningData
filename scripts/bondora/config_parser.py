@@ -19,24 +19,26 @@ defaults = {
 
 mandatory_fields = {
     "study_name",
-    "studies_dir",
     "search_space",
     "n_trials",
     "n_startup_trials",
-    "run_xml_path",
-    "default_algs_xml_path",
-    "scratch_dir_path",
-    "pandora_setup_path",
-    "pandora_interface_path",
-    "pandora_geometry_path",
-    "pndr_data_path",
     "n_processes",
     "n_files_per_process",
     "n_files_total",
     "expected_single_file_process_time",
-    "pandora_run_script_path",
-    "aggregate_validations_script_path",
-    "result_parser"
+    "result_parser",
+    "scratch_dir_path",
+    "studies_dir",
+    "pndr_data_path",
+    "bondora_base_path",
+    "default_algs_xml_relpath",
+    "run_xml_relpath",
+    "pandora_run_script_relpath",
+    "aggregate_validations_script_relpath",
+    "pandora_base_path",
+    "pandora_setup_relpath",
+    "pandora_interface_relpath",
+    "pandora_geometry_relpath"
 }
 
 def get_config(conf_path, _overwrite_dict={}):
@@ -54,6 +56,8 @@ def get_config(conf_path, _overwrite_dict={}):
 
     for option in set(defaults.keys()) - set(conf_dict.keys()):
         conf_dict[option] = defaults[option]
+
+    _make_paths(conf_dict)
 
     # Prep results dir and study DB
     if conf_dict["study_storage_name"] is not None:
@@ -122,3 +126,16 @@ def get_config(conf_path, _overwrite_dict={}):
     conf = conf_namedtuple(**conf_dict)
 
     return conf
+
+def _make_paths(conf_dict):
+    def join(d, basepath, relpath, path):
+        d[path] = os.path.join(d[basepath], d[relpath])
+
+    join(conf_dict, "pandora_base_path", "pandora_setup_relpath", "pandora_setup_path")
+    join(conf_dict, "pandora_base_path", "pandora_interface_relpath", "pandora_interface_path")
+    join(conf_dict, "pandora_base_path", "pandora_geometry_relpath", "pandora_geometry_path")
+
+    join(conf_dict, "bondora_base_path", "run_xml_relpath", "run_xml_path")
+    join(conf_dict, "bondora_base_path", "default_algs_xml_relpath", "default_algs_xml_path")
+    join(conf_dict, "bondora_base_path", "pandora_run_script_relpath", "pandora_run_script_path")
+    join(conf_dict, "bondora_base_path", "aggregate_validations_script_relpath", "aggregate_validations_script_path")

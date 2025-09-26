@@ -1,24 +1,28 @@
 study_name: "2dclustering_W_example_study" # Name of this study
-studies_dir: "/storage/epp2/phsajw/bondora/study_results" # Where to make the directory to put study outputs (DB and copy of config file)
 study_storage_name: "Everything_W_importancerandomtop19_tp+tc.db" # Name of study db file
 load_study: False # If true and 'study_storage_name' exists, the optimisation will continue from the last checkpoint
 
 scratch_dir_path: "/storage/epp2/phsajw/bondora/scratch" # Scratch dir write temp files to
-pandora_setup_path: "/storage/epp2/phsajw/pandora_2dclustering_build3/setup.sh" # Script to setup your pandora buid
-pandora_interface_path: "/storage/epp2/phsajw/pandora_2dclustering_build3/LArReco/bin/PandoraInterface" # Pandora exe for your build area
-pandora_geometry_path: "/storage/epp2/phsajw/pandora_2dclustering_build3/LArReco/geometry/PandoraGeometry_DUNEFD_1x2x6.xml" # Pandora geometry for your build area
-
 pndr_data_path: "/storage/epp2/phsajw/datasets/dune10kt_1x2x6_v09_81_00d02_lbl_norollup_mixed/train" # Directory of pndrs
+studies_dir: "/storage/epp2/phsajw/bondora/study_results" # Where to make the directory to put study outputs (DB and copy of config file)
 
-run_xml_path: "/storage/epp2/phsajw/bondora/LArMachineLearningData/scripts/bondora/settings/PandoraSettings_Master_DUNEFD.xml" # Pandora entry xml (_Master_) to use
-default_algs_xml_path: "/storage/epp2/phsajw/bondora/LArMachineLearningData/scripts/bondora/settings/2d_clustering/PandoraSettings_Neutrino_DUNEFD_W.xml" # Pandora xml with explicit xml tags for config parameters you want to optimise
+pandora_base_path: "/storage/epp2/phsajw/pandora_2dclustering_build3"
+pandora_setup_relpath:     "setup.sh" # Script to setup your pandora buid
+pandora_interface_relpath: "LArReco/bin/PandoraInterface" # Pandora exe for your build area
+pandora_geometry_relpath:  "LArReco/geometry/PandoraGeometry_DUNEFD_1x2x6.xml" # Pandora geometry for your build area
 
-pandora_run_script_path: "/storage/epp2/phsajw/bondora/LArMachineLearningData/scripts/bondora/scripts/clustering_randomorder.sh" # Script for running pandora (takes care of some bookkeeping)
-aggregate_validations_script_path: "/storage/epp2/phsajw/bondora/LArMachineLearningData/scripts/bondora/scripts/aggregate_validations_trackpuritycompleteness.sh" # Aggregate and extract average metrics from the validation ROOT files
+bondora_base_path: "/storage/epp2/phsajw/bondora/LArMachineLearningData/scripts/bondora"
+run_xml_relpath:                      "settings/PandoraSettings_Master_DUNEFD.xml" # Pandora entry xml (_Master_) to use
+default_algs_xml_relpath:             "settings/2d_clustering/PandoraSettings_Neutrino_DUNEFD_W.xml" # Pandora xml with explicit xml tags for config parameters you want to optimise
+pandora_run_script_relpath:           "scripts/clustering_randomorder.sh" # Script for running pandora (takes care of some bookkeeping)
+aggregate_validations_script_relpath: "scripts/aggregate_validations_trackpuritycompleteness.sh" # Aggregate and extract average metrics from the validation ROOT files
+
 result_parser: "track_purity_completeness" # Derived class in 'results_parsers.py' to convert aggregated metrics into a single objective value
 sampler: "gp" # Type of sample: 'gp' is gaussian process (Bayesian Optimisation), 'random' is random sampling (calculating paramter importance)
-n_processes: 47 # Number of parallel pandora processes
-n_files_total: 600 # Number of files to process
+# XXX n_processes: 47 # Number of parallel pandora processes
+n_processes: 2 # Number of parallel pandora processes
+# XXX n_files_total: 600 # Number of files to process
+n_files_total: 4 # Number of files to process
 expected_single_file_process_time: 30 # Used to define a cut off time for a pandora process
 n_files_per_process: 1 # Number of .pndr files each pandora process runs on
 sampler_seed: 1 # Seed to pass to the sampler
@@ -119,8 +123,10 @@ search_space: # Define the search space of the optimisation
     - 10
     - 30
     - null
-n_trials: 410 # Number of trials including startup trials
-n_startup_trials: 10 # Number of startup trials, these are random samples to "warm up" the Gaussian process
+# XXX n_trials: 410 # Number of trials including startup trials
+n_trials: 5 # Number of trials including startup trials
+# XXX n_startup_trials: 10 # Number of startup trials, these are random samples to "warm up" the Gaussian process
+n_startup_trials: 2 # Number of startup trials, these are random samples to "warm up" the Gaussian process
 initial_param_point: # If not null, first config parameters to sample. I set this to the default parameters so impact of the optimisation can be easily analysed.
   LArLongitudinalExtension/EmissionMaxLongitudinalDisplacement: 15.0
   LArClusteringParent/LArTrackClusterCreation/MaxCaloHitSeparation: 1.4

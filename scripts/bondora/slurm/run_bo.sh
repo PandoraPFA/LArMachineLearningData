@@ -14,8 +14,8 @@
 
 SETTINGS_FILE=$1
 
-WORK_DIR="/storage/epp2/phsajw/optuna_bo/optuna_bo"
-VENV_SETUP="/storage/epp2/phsajw/optuna_bo/setup_venv.sh"
+WORK_DIR="/storage/epp2/phsajw/bondora/LArMachineLearningData/scripts/bondora"
+VENV_SETUP="/storage/epp2/phsajw/bondora/setup_venv.sh"
 
 ######
 
