@@ -14,7 +14,7 @@ pip install optuna numpy matplotlib scipy sympy pyyaml psutil torch
 ```
 I expect any python 3 with the above libraries installed will work. I had optuna `4.2.1`.
 
-BOndora will need a way to setup this same python environment too. Make a bash script somewhere to perform the setup. Here's mine:
+You should make a bash script to setup this venv, here's mine:
 ```
 $ cat setup_venv.sh 
 source /cvmfs/larsoft.opensciencegrid.org/spack-packages/setup-env.sh
