@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 from torch.utils.data import Dataset
+import sys
 
 ################################################################################################################################################
 ################################################################################################################################################
@@ -21,9 +22,11 @@ class ClassificationDataset(Dataset):
 ################################################################################################################################################
 
 def get_classification_datasets(device, training_fraction):
- 
-    inputs = np.load('x_tokens_UVW.npy', mmap_mode='r')
-    labels = np.load('is_contaminated_UVW.npy', mmap_mode='r')
+
+    #sys.path.insert(0, '/home/imawby/LArMachineLearningData/scripts/deep_learning/clusterSplitting')
+
+    inputs = np.load(sys.path[0] + '/files/x_tokens_UVW.npy', mmap_mode='r')
+    labels = np.load(sys.path[0] + '/files/is_contaminated_UVW.npy', mmap_mode='r')
     
     split_idx = int(labels.shape[0] * training_fraction)
     shuffled_indices = np.random.permutation(labels.shape[0])
@@ -59,9 +62,11 @@ class SplitPointDataset(Dataset):
 
 def get_split_point_datasets(device, training_fraction):
     
-    inputs = np.load('x_tokens_UVW.npy', mmap_mode='r')
-    labels = np.load('y_tokens_UVW.npy', mmap_mode='r')
-    is_contaminated = np.load('is_contaminated_UVW.npy', mmap_mode='r')
+    #sys.path.insert(0, '/home/imawby/LArMachineLearningData/scripts/deep_learning/clusterSplitting')
+    
+    inputs = np.load(sys.path[0] + '/files/x_tokens_UVW.npy', mmap_mode='r')
+    labels = np.load(sys.path[0] + '/files/y_tokens_UVW.npy', mmap_mode='r')
+    is_contaminated = np.load(sys.path[0] + '/files/is_contaminated_UVW.npy', mmap_mode='r')
    
     split_idx = int(labels.shape[0] * training_fraction)
     shuffled_indices = np.random.permutation(labels.shape[0])
