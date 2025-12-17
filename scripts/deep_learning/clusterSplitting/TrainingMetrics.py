@@ -4,93 +4,37 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 ################################################################################################################################################
-# Encoder
 ################################################################################################################################################
 
-def plot_scores_class(scores_train, scores_test, truth_train, truth_test, score_class_index) :
-    
-    class_scores_train = scores_train[:, score_class_index]
-    class_scores_test = scores_test[:, score_class_index]
-    
-    for class_index in [0, 1, 2] :
-    
-        this_scores_train = class_scores_train[truth_train == class_index]
-        this_scores_test = class_scores_test[truth_test == class_index]
-    
-        plotting_weights_train = 1.0 / float(this_scores_train.shape[0])
-        plotting_weights_train = torch.ones(this_scores_train.shape) * plotting_weights_train
-        
-        plotting_weights_test = 1.0 / float(this_scores_test.shape[0])
-        plotting_weights_test = torch.ones(this_scores_test.shape) * plotting_weights_test
+contamination_labels = [0, 1, 2]
+contamination_strings = { 0 : 'Track Not Contaminated', 1 : 'Track Contaminated', 2 : 'Shower'}
+contamination_colours = { 0 : 'red', 1 : 'blue', 2 : 'green'}
 
-        legend_string = 'False' if class_index == 0 else 'True' if class_index == 1 else 'Shower'
-        graph_color = 'red' if class_index == 0 else 'blue' if class_index == 1 else 'green'
-        
-        plt.hist(this_scores_train, bins=50, range=(0, 1.0), color=graph_color, label=(legend_string + ' train'), weights=plotting_weights_train, histtype='step', linestyle='solid')
-        plt.hist(this_scores_test, bins=50, range=(0, 1.0), color=graph_color, label=(legend_string + ' test'), weights=plotting_weights_test, histtype='step', linestyle='dashed')
-
-    plt.yscale("log")
-    plt.xlabel(('Classification Score For Class: ' + str(score_class_index)))
-    plt.ylabel('log(Proportion of Clusters)')
-    plt.legend(loc='best')
-    plt.show() 
-    
-################################################################################################################################################
-################################################################################################################################################      
-    
-def draw_confusion_class(scores, labels, threshold):
-    
-    n_classes = scores.shape[1] + 1
-    pred = np.argmax(scores, axis=1)
-    pred[scores.max(axis=1) < threshold] = (n_classes - 1) # optional reject case
-    confMatrix = confusion_matrix(labels, pred)
-    
-    trueSums = np.sum(confMatrix, axis=1)
-    predSums = np.sum(confMatrix, axis=0)
-
-    trueNormalised = np.zeros(shape=(n_classes, n_classes))
-    predNormalised = np.zeros(shape=(n_classes, n_classes))
-
-    for trueIndex in range(n_classes) : 
-        for predIndex in range(n_classes) :
-            nEntries = confMatrix[trueIndex][predIndex]
-            if trueSums[trueIndex] > 0 :
-                trueNormalised[trueIndex][predIndex] = float(nEntries) / float(trueSums[trueIndex])
-            if predSums[predIndex] > 0 :
-                predNormalised[trueIndex][predIndex] = float(nEntries) / float(predSums[predIndex])
-
-    displayTrueNorm = ConfusionMatrixDisplay(confusion_matrix=trueNormalised, display_labels=range(n_classes))
-    displayTrueNorm.plot()
-
-    displayPredNorm = ConfusionMatrixDisplay(confusion_matrix=predNormalised, display_labels=range(n_classes))
-    displayPredNorm.plot()     
-    plt.show()        
+split_point_labels = [0, 1]
+split_point_strings = { 0 : 'False', 1 : 'True'}
+split_point_colours = { 0 : 'red', 1 : 'blue'}
 
 ################################################################################################################################################
-# Encoder-decoder
 ################################################################################################################################################
 
-def plot_scores(scores_train, scores_test, truth_train, truth_test) :
+def plot_scores(scores_train, scores_test, truth_train, truth_test, is_contamination) :
+    
+    class_indices = contamination_labels if is_contamination else split_point_labels
+    class_strings = contamination_strings if is_contamination else split_point_strings
+    class_colours = contamination_colours if is_contamination else split_point_colours
+    
+    for class_index in class_indices :
+        class_scores_train = scores_train[truth_train == class_index]
+        class_scores_test = scores_test[truth_test == class_index]
 
-    true_scores_train = scores_train[truth_train == 1]
-    false_scores_train = scores_train[truth_train == 0]
-    true_scores_test = scores_test[truth_test == 1]
-    false_scores_test = scores_test[truth_test == 0]
+        plotting_weights_train = 1.0 / float(class_scores_train.shape[0])
+        plotting_weights_train = torch.ones(class_scores_train.shape) * plotting_weights_train
+        plotting_weights_test = 1.0 / float(class_scores_test.shape[0])
+        plotting_weights_test = torch.ones(class_scores_test.shape) * plotting_weights_test    
     
-    true_plotting_weights_train = 1.0 / float(true_scores_train.shape[0])
-    true_plotting_weights_train = torch.ones(true_scores_train.shape) * true_plotting_weights_train
-    false_plotting_weights_train = 1.0 / float(false_scores_train.shape[0])
-    false_plotting_weights_train = torch.ones(false_scores_train.shape) * false_plotting_weights_train
-    true_plotting_weights_test = 1.0 / float(true_scores_test.shape[0])
-    true_plotting_weights_test = torch.ones(true_scores_test.shape) * true_plotting_weights_test
-    false_plotting_weights_test = 1.0 / float(false_scores_test.shape[0])
-    false_plotting_weights_test = torch.ones(false_scores_test.shape) * false_plotting_weights_test    
-    
-    plt.hist(true_scores_train, bins=50, range=(0, 1.0), color='blue', label='signal_train', weights=true_plotting_weights_train, histtype='step', linestyle='solid')
-    plt.hist(false_scores_train, bins=50, range=(0, 1.0), color='red', label='background_train', weights=false_plotting_weights_train, histtype='step', linestyle='solid')
-    plt.hist(true_scores_test, bins=50, range=(0, 1.0), color='blue', label='signal_test', weights=true_plotting_weights_test, histtype='step', linestyle='dashed')
-    plt.hist(false_scores_test, bins=50, range=(0, 1.0), color='red', label='background_test', weights=false_plotting_weights_test, histtype='step', linestyle='dashed')    
-    
+        plt.hist(class_scores_train, bins=50, range=(0, 1.0), color=class_colours[class_index], label=(f'{class_strings[class_index]} (train)'), weights=plotting_weights_train, histtype='step', linestyle='solid')
+        plt.hist(class_scores_test, bins=50, range=(0, 1.0), color=class_colours[class_index], label=(f'{class_strings[class_index]} (test)'), weights=plotting_weights_test, histtype='step', linestyle='dashed')
+
     plt.yscale("log")
     plt.xlabel('Classification Score')
     plt.ylabel('log(Proportion of Clusters)')
@@ -98,39 +42,56 @@ def plot_scores(scores_train, scores_test, truth_train, truth_test) :
     plt.show()
     
 ################################################################################################################################################
-################################################################################################################################################      
+################################################################################################################################################       
 
-def draw_confusion(pred, labels, threshold):
+def draw_confusion(pred, labels, thresholds, is_contamination):  
     
-    n_classes = 2
+    class_indices = contamination_labels if is_contamination else split_point_labels
+    n_classes = len(contamination_labels) + 1
+    
+    if (len(thresholds) != len(class_indices)) :
+        print('Wrong number of thresholds!')
+        return
+    
     scores = pred.copy()
-    predicted_true_mask = scores > threshold
-    predicted_false_mask = np.logical_not(predicted_true_mask)
-    scores[predicted_true_mask] = 1
-    scores[predicted_false_mask] = 0
-    confMatrix = confusion_matrix(labels, scores)
     
-    trueSums = np.sum(confMatrix, axis=1)
-    predSums = np.sum(confMatrix, axis=0)
+    # Modify if binary input
+    if (len(class_indices) == 2) :
+        scores = np.hstack((1 - scores, scores))
 
-    trueNormalised = np.zeros(shape=(n_classes, n_classes))
-    predNormalised = np.zeros(shape=(n_classes, n_classes))
-
-    for trueIndex in range(n_classes) : 
-        for predIndex in range(n_classes) :
-            nEntries = confMatrix[trueIndex][predIndex]
-            if trueSums[trueIndex] > 0 :
-                trueNormalised[trueIndex][predIndex] = float(nEntries) / float(trueSums[trueIndex])
-            if predSums[predIndex] > 0 :
-                predNormalised[trueIndex][predIndex] = float(nEntries) / float(predSums[predIndex])
-
-    displayTrueNorm = ConfusionMatrixDisplay(confusion_matrix=trueNormalised, display_labels=["False", "True"])
-    displayTrueNorm.plot()
-
-    displayPredNorm = ConfusionMatrixDisplay(confusion_matrix=predNormalised, display_labels=["False", "True"])
-    displayPredNorm.plot()  
+    selected = np.argmax(scores, axis=1)
+    selected_scores = scores.max(axis=1)
     
-################################################################################################################################################
-################################################################################################################################################    
+    for class_index in class_indices :
+        below_threshold = (selected == class_index) & (selected_scores < thresholds[class_index])
+        selected[below_threshold] = (n_classes - 1) # optional reject case
+        
+    conf_matrix = confusion_matrix(labels, selected)    
+    
+    # redefine n_classes if needs be
+    n_classes = conf_matrix.shape[0]
+    
+    true_sums = np.sum(conf_matrix, axis=1)
+    pred_sums = np.sum(conf_matrix, axis=0)
 
- 
+    true_normalised = np.zeros(shape=(n_classes, n_classes))
+    pred_normalised = np.zeros(shape=(n_classes, n_classes))
+
+    for true_index in range(n_classes) : 
+        for pred_index in range(n_classes) :
+            n_entries = conf_matrix[true_index][pred_index]
+            if true_sums[true_index] > 0 :
+                true_normalised[true_index][pred_index] = float(n_entries) / float(true_sums[true_index])
+            if pred_sums[pred_index] > 0 :
+                pred_normalised[true_index][pred_index] = float(n_entries) / float(pred_sums[pred_index])
+
+    display_labels = list(contamination_strings.values()) if is_contamination else list(split_point_strings.values())
+    
+    # Handle our reject case
+    if (n_classes > len(display_labels)) :
+        display_labels.append('Other')
+                
+    displayTrue_norm = ConfusionMatrixDisplay(confusion_matrix=true_normalised, display_labels=display_labels)
+    displayTrue_norm.plot()
+    displayPred_norm = ConfusionMatrixDisplay(confusion_matrix=pred_normalised, display_labels=display_labels)
+    displayPred_norm.plot()
