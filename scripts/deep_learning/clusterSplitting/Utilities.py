@@ -5,7 +5,6 @@ import math
 ############################################################################################################################################ 
 
 def CreateWindows(element, window_size, no_overlap) :
-    
     windows = [element]
         
     if len(element) > window_size :
@@ -16,12 +15,8 @@ def CreateWindows(element, window_size, no_overlap) :
             windows.append(element[len(element) - window_size:])
             
             if no_overlap:
-                remove_end = (np.random.rand() > 0.5)
-                
-                if (remove_end):
-                    del windows[n_windows] 
-                else:
-                    del windows[n_windows - 1] 
+                remove_end = (np.random.rand() > 0.5)                
+                del windows[n_windows if remove_end else n_windows -1]
 
     return windows 
 
@@ -29,21 +24,13 @@ def CreateWindows(element, window_size, no_overlap) :
 ############################################################################################################################################
 
 def SplitIntoWindows(input_array, windows_indices):    
-    return [
-        entry[index[0]:index[-1] + 1]
-        for entry, index_array in zip(input_array, windows_indices)
-        for index in index_array
-    ]
+    return [entry[index[0]:index[-1] + 1] for entry, index_array in zip(input_array, windows_indices) for index in index_array]
 
 ############################################################################################################################################
 ############################################################################################################################################
 
 def GetClusterIndices(windows_indices):
-    return [
-        i
-        for i, index_array in enumerate(windows_indices)
-        for _ in index_array
-    ]
+    return [i for i, index_array in enumerate(windows_indices) for _ in index_array]
 
 ############################################################################################################################################
 ############################################################################################################################################
@@ -56,13 +43,12 @@ def GetTruthDistanceArray(longitudinal_array, splitting_positions) :
 ############################################################################################################################################
 
 def GetTruthDistanceElement(longitudinal_element, splitting_positions) :
-    
     longitudinal_element = np.asarray(longitudinal_element)
     splitting_positions = np.asarray(splitting_positions)
 
     # If no split positions
     if (splitting_positions.shape[0] == 0) :
-        return np.full(np.asarray(longitudinal_element).shape, int(0))
+        return np.zeros_like(longitudinal_element).astype(int)
     
     # work out distance from each split
     distance_from_splits = np.abs(longitudinal_element.reshape(-1, 1) - splitting_positions)
@@ -96,12 +82,6 @@ def ProcessTruth(is_shower_array, cluster_indices, longitudinal_array, splitting
 ############################################################################################################################################
 
 def ProcessFeature(feature, windows_indices) :
-    # Split into windows
     feature = SplitIntoWindows(feature, windows_indices)
-    # turn into numpy
     feature = np.asarray(feature)
-    
     return feature
-
-############################################################################################################################################
-############################################################################################################################################
