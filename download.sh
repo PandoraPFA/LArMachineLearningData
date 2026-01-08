@@ -47,6 +47,13 @@ then
   download "TXa87V98R46HQSw" "PandoraBdt_Vertexing_DUNEFD_v03_27_00.xml"
 fi
 
+# DUNE ND
+
+if [[ "$1" == "dunend" ]]
+then
+  download "Ar7fS1gRdZ1j4Wx" "PandoraBdt_PfoCharacterisation_DUNEND_LAR_v04_18_00.xml"
+fi
+
 ### PandoraMVAs
 mkdir -p $MY_TEST_AREA/LArMachineLearningData/PandoraMVAs
 cd $MY_TEST_AREA/LArMachineLearningData/PandoraMVAs
