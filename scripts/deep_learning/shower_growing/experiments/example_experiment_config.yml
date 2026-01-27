@@ -1,0 +1,64 @@
+checkpoints_dir: /path/to/LArMachineLearningData/scripts/deep_learning/shower_growing/checkpoints
+name: example_experiment
+
+data_path: /path/to/data
+
+hit_feat_vec_dim : 14 # Dim of hit feature vector including optionally additional features below
+hit_feat_add_cardinality: True # Add to end of each hit feature vector the number of hits in the cluster and the numger of clusters in the event
+hit_feat_add_aug_tier: False # Add to the end of each hit feature vector the iteration number of the online iterative clustering augmentation
+hit_feat_add_at_epoch: 2 # Delay the addition of the above two features until this epoch
+hit_feat_scaling_factors: # Scaling factors to apply to hit feature vector index, see helpers.py
+  0: polar_r
+  3: cartesian_x
+  4: cartesian_z
+  5: cartesian_x
+  6: cartesian_z
+  7: cartesian_x
+hit_feat_log_transforms: [ 8, 12, 13 ] # Hit feature vector indices to log-transform
+net_intra_cluster_encoder_params: # Architecture hyperparameters
+  embd_dim: 64
+  hidden_dim: 128
+  num_inds: 32
+  num_heads: 8
+  ln: False
+  lr: 0.00001
+net_inter_cluster_attn_params: # Architecture hyperparameters
+  embd_dim: 128
+  hidden_dim: 256
+  num_inds: 32
+  num_heads: 8
+  ln: False
+  lr: 0.0001
+net_inter_cluster_sim_params: # Architecture hyperparameters
+  hidden_dim: 512
+  lr: 0.0001
+
+lr_scheduler_params: # Loss scheduler hyperparameters, see model.py
+  scheduler: OneCycleLR
+  max_lr_factor: 2
+
+loss_params: # Extra loss features, see model.py
+  weights: log_with_penalty
+
+train_loss_iter: 400 # Running train loss calculation frequency
+val_iter: 2500 # Validation loss calculation frequency
+save_best_weights: True # Save the latest weights at the end of each epoch
+save_latest_epoch_weights: True # Save the weights associated with the best validation loss
+continue_training_from_weights: /path/to/other/checkpoint/weights # Load model, optimizer, scheduler weights from another experiment and continue training from there, useful for long trainings when job alltimes are capped
+
+batch_size: 8
+epochs: 30
+max_num_workers: 4
+
+aug_params: # Parameters controlling the iterative clustering online augmentations
+  iterative_augs: True # Feed result of the model prediction + clustering back into the training
+  aug_sim_threshold: 0.6 # Threshold to use for clustering from the model prediction
+  aug_freq_epoch: 1 # Epochs to wait before increasing the max iteration number
+  aug_warmup_epoch: 10 # Epochs to wait before including the augmentations
+
+plot_params: # Parameters to get the plotting right
+  has_summary_token: False
+  polar_coords: True
+  view: -3 # Location of last index of one-hot view encoding
+  x_width_idx: 5
+
