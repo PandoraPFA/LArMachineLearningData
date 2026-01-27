@@ -90,7 +90,7 @@ CLUSTER_SIM_DEFAULTS=COMMON_DEFAULTS | {
         "aug_sim_threshold" : 0.5,
         "aug_freq_epoch" : 1,
         "aug_warmup_epoch" : 0,
-        "aug_max_n_jobs" : 1,
+        "aug_max_n_jobs" : 0,
         "aug_fixed_epoch_len": False,
         "aug_proba": None
     }
