@@ -19,6 +19,7 @@ Use the script `data/read_cluster.py` to process the ROOT file into training dat
 - I found the best hit feature vector preset to be 8, `--hit_feature_preset 8`
 - To enable training with augmentations from iterative application of the prediction & clustering, you must have `--save_mc_cnts`
 - For a mixed view training dataset, point `--out_dir_U`, `--out_dir_V`, and `--out_dir_W` all to the same directory.
+
 The output will be a directory full of `.pt` files. Shuffle these into a directory structure like
 ```
 my_dataset/
@@ -31,7 +32,7 @@ my_dataset/
 
 #### Running a Training
 
-Training are configured through experiment yamls, see `experiments/example_experiment_config.yml`. They are submitted via the `train.py` script. The training will populate a directory in `checkpoints/` with loss values, validation examples, weight file etc.
+Trainings are configured through experiment yamls, see `experiments/example_experiment_config.yml`. They are submitted via the `train.py` script. The training will populate a directory in `checkpoints/` with loss values, validation examples, weight files etc.
 
 #### Evaluating a Training
 
@@ -39,7 +40,7 @@ Training are configured through experiment yamls, see `experiments/example_exper
 
 #### Exporting to Torchscript
 
-`export_to_torchscript.py` does this with the option to validate the export (this takes a long time). The flag `--use_chunked_similarity_forward` is recommended, this performs the similarity MLP inference is serial chunks, which is the correct thing to do for CPU inference. Memory usage can be very high if this is not set.
+`export_to_torchscript.py` does what it says with the option to validate the export (this takes a long time). The flag `--use_chunked_similarity_forward` is recommended, this performs the similarity MLP inference is serial chunks, which is the correct thing to do for CPU inference. Memory usage can be very high if this is not set.
 
 ### Notes on Code
 
@@ -62,4 +63,4 @@ slurm/ # Submission scripts for slurm
 ```
 
 - `clustering.py` was originally for testing multiple clustering algorithms, it now just holds the implementation of the best algorithm, `connected_accessory_clustering`
-- To reuse the Slurm submission scripts, you will need to edit the `SBATCH` commands
+- To reuse the Slurm submission scripts, you will need to edit the `#SBATCH` commands
