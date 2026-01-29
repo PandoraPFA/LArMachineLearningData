@@ -102,6 +102,7 @@ def root_to_images(tree_name, input_file, output_dir, file_index):
                     charge = pixelCharges[e][i]
                     if charge > 10:
                         charge = 10
+                    # Subtract 4 to convert Pandora enum TPC_VIEW_U,V,W (4, 5, 6) to (0, 1, 2) and scale charge to 0 - 255
                     viewImages[pixelViews[e][i] - 4][pixelRows[e][i]][pixelCols[e][i]] = pixelCharges[e][i] * 25.5
             
                 # Save the images for each view separately as greyscale png files
