@@ -59,20 +59,16 @@ arr_cc_numu_score = np.empty((0,1), dtype=float)
 arr_cc_nue_score = np.empty((0,1), dtype=float)
 
 # Track classification scores
-arr_trk_0_score = np.empty((0,1), dtype=float)
-arr_trk_1_score = np.empty((0,1), dtype=float)
-arr_trk_2_score = np.empty((0,1), dtype=float)
-arr_trk_3_score = np.empty((0,1), dtype=float)
-arr_trk_4_score = np.empty((0,1), dtype=float)
-arr_trk_5_score = np.empty((0,1), dtype=float)
+n_trk_classes = 6
+arr_trk_scores = []
+for i in range(n_trk_classes):
+    arr_trk_scores.append(np.empty((0,1), dtype=float))
 
 # Shower classification scores
-arr_shw_0_score = np.empty((0,1), dtype=float)
-arr_shw_1_score = np.empty((0,1), dtype=float)
-arr_shw_2_score = np.empty((0,1), dtype=float)
-arr_shw_3_score = np.empty((0,1), dtype=float)
-arr_shw_4_score = np.empty((0,1), dtype=float)
-arr_shw_5_score = np.empty((0,1), dtype=float)
+n_shw_classes = 6
+arr_shw_scores = []
+for i in range(n_shw_classes):
+    arr_shw_scores.append(np.empty((0,1), dtype=float))
 
 arr_true_pid = np.empty((0,1), dtype=float)
 arr_true_trk = np.empty((0,1), dtype=float)
@@ -101,19 +97,11 @@ with torch.no_grad():
         arr_cc_numu_score = np.concatenate((arr_cc_numu_score, outputs[0][:,1].cpu().unsqueeze(1).numpy()))
         arr_cc_nue_score = np.concatenate((arr_cc_nue_score, outputs[0][:,2].cpu().unsqueeze(1).numpy()))
 
-        arr_trk_0_score = np.concatenate((arr_trk_0_score, outputs[1][:,0].cpu().unsqueeze(1).numpy()))
-        arr_trk_1_score = np.concatenate((arr_trk_1_score, outputs[1][:,1].cpu().unsqueeze(1).numpy()))
-        arr_trk_2_score = np.concatenate((arr_trk_2_score, outputs[1][:,2].cpu().unsqueeze(1).numpy()))
-        arr_trk_3_score = np.concatenate((arr_trk_3_score, outputs[1][:,3].cpu().unsqueeze(1).numpy()))
-        arr_trk_4_score = np.concatenate((arr_trk_4_score, outputs[1][:,4].cpu().unsqueeze(1).numpy()))
-        arr_trk_5_score = np.concatenate((arr_trk_5_score, outputs[1][:,5].cpu().unsqueeze(1).numpy()))
+        for i in range(n_trk_classes):
+            arr_trk_scores[i] = np.concatenate((arr_trk_scores[i], outputs[1][:,i].cpu().unsqueeze(1).numpy()))
 
-        arr_shw_0_score = np.concatenate((arr_shw_0_score, outputs[2][:,0].cpu().unsqueeze(1).numpy()))
-        arr_shw_1_score = np.concatenate((arr_shw_1_score, outputs[2][:,1].cpu().unsqueeze(1).numpy()))
-        arr_shw_2_score = np.concatenate((arr_shw_2_score, outputs[2][:,2].cpu().unsqueeze(1).numpy()))
-        arr_shw_3_score = np.concatenate((arr_shw_3_score, outputs[2][:,3].cpu().unsqueeze(1).numpy()))
-        arr_shw_4_score = np.concatenate((arr_shw_4_score, outputs[2][:,4].cpu().unsqueeze(1).numpy()))
-        arr_shw_5_score = np.concatenate((arr_shw_5_score, outputs[2][:,5].cpu().unsqueeze(1).numpy()))
+        for i in range(n_shw_classes):
+            arr_shw_scores[i] = np.concatenate((arr_shw_scores[i], outputs[2][:,i].cpu().unsqueeze(1).numpy()))
 
         arr_true_pid = np.concatenate((arr_true_pid, labels[:,0].cpu().unsqueeze(1).numpy()))
         arr_true_trk = np.concatenate((arr_true_trk, labels[:,1].cpu().unsqueeze(1).numpy()))
@@ -132,9 +120,8 @@ print("Testing complete!")
 print(total_cm_nu)
 print(total_cm_tracks)
 print(total_cm_showers)
-print(arr_nc_score.shape, arr_trk_0_score.shape, arr_shw_0_score.shape, arr_true_pid.shape, arr_true_trk.shape, arr_true_shw.shape)
 
 np.savez("testing_outputs.npz", arr_nc_score, arr_cc_numu_score, arr_cc_nue_score, \
-                                arr_trk_0_score, arr_trk_1_score, arr_trk_2_score, arr_trk_3_score, arr_trk_4_score, arr_trk_5_score, \
-                                arr_shw_0_score, arr_shw_1_score, arr_shw_2_score, arr_shw_3_score, arr_shw_4_score, arr_shw_5_score, \
+                                arr_trk_scores[0], arr_trk_scores[1], arr_trk_scores[2], arr_trk_scores[3], arr_trk_scores[4], arr_trk_scores[5], \
+                                arr_shw_scores[0], arr_shw_scores[1], arr_shw_scores[2], arr_shw_scores[3], arr_shw_scores[4], arr_shw_scores[5], \
                                 arr_true_pid, arr_true_trk, arr_true_shw)
