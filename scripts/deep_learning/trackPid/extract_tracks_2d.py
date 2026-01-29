@@ -44,7 +44,7 @@ def extract_tracks_from_root_file(input_file_path, tree_name, output_path, outpu
                     continue
 
                 if hits_cut > 0:
-                    if batch['uViewNHits'][t] < hits_cut and batch['vViewNHits'][t] < hits_cut and batch['wViewNHits'][t] < hits_cut:
+                    if batch['uViewNHits'][t] < hits_cut or batch['vViewNHits'][t] < hits_cut or batch['wViewNHits'][t] < hits_cut:
                         continue
 
                 this_track = InputTrack(batch['uViewX'][t], batch['uViewWire'][t], batch['uViewQ'][t], batch['uViewNHits'][t],
