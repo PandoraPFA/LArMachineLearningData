@@ -60,12 +60,15 @@ class NeutrinoDatasetWithVertex(torch.utils.data.Dataset):
         return weights * n_elements
 
     def get_flavour_weights(self):
+        # This corresponds to the zeroth output and has three classes
         return self.calc_weights(0, 3)
 
     def get_n_tracks_weights(self):
+        # This corresponds to the first output and has six classes
         return self.calc_weights(1, 6)
 
     def get_n_showers_weights(self):
+        # This corresponds to the second output and has six classes
         return self.calc_weights(2, 6)
 
     def __len__(self):
