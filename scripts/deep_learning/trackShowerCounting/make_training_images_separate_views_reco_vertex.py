@@ -28,6 +28,14 @@ def nu_target_to_string(nu_target):
     else:
         return 'cc_nue'
     
+def is_in_fiducial_volume(x, y, z):
+    if math.fabs(x) > 310.0:
+        return false
+    if math.fabs(y) > 550.0:
+        return false
+    if z < 50.0 or z > 1244:
+        return false
+    return true
 
 def root_to_images(tree_name, input_file, output_dir, file_index):
     with uproot.open(input_file+":"+tree_name) as tree:
@@ -73,17 +81,15 @@ def root_to_images(tree_name, input_file, output_dir, file_index):
             for e in range(len(nuPDG)):
                 nu_target = pdg_to_target(nuPDG[e], isCC[e])
                 if nu_target < 0:
-                    continue;
+                    continue
             
-                # Apply truth cuts
+                # Apply energy cut as high energy events are very messy and very error prone
                 if nuEnergy[e] > 10.0:
-                    continue;
-                if math.fabs(nuTrueVertexX[e]) > 310.0:
-                    continue;
-                if math.fabs(nuTrueVertexY[e]) > 550.0:
-                    continue;
-                if nuTrueVertexZ[e] < 50.0 or nuTrueVertexZ[e] > 1244:
-                    continue;
+                    continue
+
+                # Apply a fiducial volume cut to ensure the vertex region is visible
+                if not is_in_fiducial_volume(nuTrueVertexX[e], nuTrueVertexY[e], nuTrueVertexZ[e]):
+                    continue
 
                 nu_string = nu_target_to_string(nu_target)
             
