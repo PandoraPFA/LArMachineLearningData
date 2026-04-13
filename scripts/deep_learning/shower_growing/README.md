@@ -59,7 +59,7 @@ my_dataset/
 
 Trainings are configured through experiment yamls, see `experiments/example_experiment_config.yml`. They are submitted via the `train.py` script. The training will populate a directory in `checkpoints/` with loss values, validation examples, weight files etc. I like to have an rsync script to download all text and pdf files from the checkpoint dirs to check trainings.
 
-For long trainings on systems with strict job time limits, the intended pattern is to chain together multiple experiment yamls. In practice this means enabling `save_latest_epoch_weights: True` in one experiment, then setting `continue_training_from_weights` in the next experiment to load those latest weights and continue from there. For example, you might run `my_experiment_continue0.yml`, then `my_experiment_continue1.yml` loading from `continue0`, then `my_experiment_continue2.yml` loading from `continue1`, and so on until the total number of epochs reaches the value you want.
+For long trainings on systems with strict job time limits, the intended pattern is to chain together multiple experiment yamls. In practice this means enabling `save_latest_epoch_weights: True` in one experiment, then setting `continue_training_from_weights` in the next experiment to load those latest weights and continue from there. For example, you might run `my_experiment_continue0.yml`, then `my_experiment_continue1.yml` loading from `continue0`, then `my_experiment_continue2.yml` loading from `continue1`, and so on until the total number of epochs reaches the value you want. If you are training interactively or your cluster has unlimited walltime, you don't need to worry about this.
 
 #### Evaluating a Training
 
@@ -68,6 +68,13 @@ For long trainings on systems with strict job time limits, the intended pattern 
 #### Exporting to Torchscript
 
 `export_to_torchscript.py` does what it says with the option to validate the export (this takes a long time). The flag `--use_chunked_similarity_forward` is recommended, this performs the similarity MLP inference is serial chunks, which is the correct thing to do for CPU inference. Memory usage can be very high if this is not set.
+
+The following experiment yamls correspond to models that have been exported and are used in production code:
+
+| Experiment YAML | Exported binaries |
+| --- | --- |
+| `Experiment_ShowerGrowing_DUNEFD_HD_v05_00_00.yml` | `PandoraNet_ShowerGrowing_DUNEFD_HD_Encoder_v05_00_00.pt`, `PandoraNet_ShowerGrowing_DUNEFD_HD_Attn_v05_00_00.pt`, `PandoraNet_ShowerGrowing_DUNEFD_HD_Sim_v05_00_00.pt` |
+| `Experiment_ShowerGrowing_DUNEFD_VD_v05_00_00.yml` | `PandoraNet_ShowerGrowing_DUNEFD_VD_Encoder_v05_00_00.pt`, `PandoraNet_ShowerGrowing_DUNEFD_VD_Attn_v05_00_00.pt`, `PandoraNet_ShowerGrowing_DUNEFD_VD_Sim_v05_00_00.pt` |
 
 ### General Notes
 
