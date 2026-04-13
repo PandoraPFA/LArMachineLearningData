@@ -57,10 +57,12 @@ def main(args):
         time_s = time.time()
         curr_epoch = epoch
         if conf.aug_params["iterative_augs"]:
-            new_max_aug_tier = max(
-                (epoch - conf.aug_params["aug_warmup_epoch"]) // conf.aug_params["aug_freq_epoch"],
-                0
+            new_max_aug_tier = (
+                (epoch - conf.aug_params["aug_warmup_epoch"]) // conf.aug_params["aug_freq_epoch"]
             )
+            new_max_aug_tier = max(new_max_aug_tier, 0)
+            if conf.aug_params["aug_max_tier"] is not None:
+                new_max_aug_tier = min(new_max_aug_tier, conf.aug_params["aug_max_tier"])
             if new_max_aug_tier != max_aug_tier:
                 logger.info(f"Maximum aug tier increased: {max_aug_tier} -> {new_max_aug_tier}")
             max_aug_tier = new_max_aug_tier

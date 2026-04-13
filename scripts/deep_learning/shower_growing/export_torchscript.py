@@ -233,7 +233,7 @@ def predict_py(t_clusters, t_sim_target, collate_fn, model):
 def get_test_data(clusters, event, view, hit_feature_preset, conf):
     t_clusters = []
     for cluster in clusters:
-        cluster_data = make_cluster_data(cluster, event, view, hit_feature_preset)
+        cluster_data = make_cluster_data(cluster, event, view, hit_feature_preset, conf.detector)
         t_clusters.append(torch.tensor(cluster_data, dtype=torch.float32))
     t_sim_target = get_similarity_matrix(clusters)
     for t in t_clusters:
@@ -269,7 +269,7 @@ def parse_cli():
 
     parser.add_argument("--validation_root_file", type=str, default=None)
     parser.add_argument("--validation_treename", type=str, default=None)
-    parser.add_argument("--validation_hit_preset", type=int, default=None, choices=range(1, 9))
+    parser.add_argument("--validation_hit_preset", type=int, default=None, choices=range(1, 11))
 
     parser.add_argument("--batch_mode", action="store_true")
 

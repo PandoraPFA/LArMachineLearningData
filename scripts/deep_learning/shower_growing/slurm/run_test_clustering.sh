@@ -17,7 +17,8 @@ FEATURE_PRESET=$6
 CLUSTERING_MODE=$7
 SUFFIX=$8
 THRES=${9:-0.5}
-THRES_STAGE2=${10:-0.5}
+BAL_EVS=${10:-0}
+THRES_STAGE2=${11:-0.5}
 
 echo $SLURMD_NODENAME
 echo $CUDA_VISIBLE_DEVICES
@@ -30,7 +31,14 @@ echo $FEATURE_PRESET
 echo $CLUSTERING_MODE
 echo $SUFFIX
 echo $THRES
+echo $BAL_EVS
 echo $THRES_STAGE2
+
+bal_evs_arg=""
+if [ "$BAL_EVS" -eq 1 ];
+then
+  bal_evs_arg="--balance_events"
+fi
 
 cd /springbrook/share/physics/phsajw/dl_cluster_merging
 source setup.sh
@@ -43,6 +51,7 @@ python test_clustering.py --batch_mode \
                           --test_dir_suffix $SUFFIX \
                           --sim_threshold $THRES \
                           --sim_threshold_stage2 $THRES_STAGE2 \
+                          $bal_evs_arg \
                           $CONFIG \
                           $WEIGHTS \
                           $TEST_FILE \

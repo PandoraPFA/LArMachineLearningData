@@ -10,6 +10,8 @@ import joblib
 
 import torch
 
+from constants import SCALING_FACTORS, PITCHES
+
 """ Start - plotting helpers """
 
 def plot_pred_target(tensors, savedir, cntr, cntr_max, conf, unscale=True):
@@ -48,7 +50,7 @@ def plot_pred_target(tensors, savedir, cntr, cntr_max, conf, unscale=True):
                     x = t_hit[0].item()
                     z = t_hit[1].item()
                     x_width = t_hit[conf.plot_params["x_width_idx"]].item()
-                z_width = get_pitch(view)
+                z_width = get_pitch(view, conf.detector)
                 patch_corner = (x - (x_width / 2), z - (z_width / 2))
                 ax[0].add_patch(
                     matplotlib.patches.Rectangle(
@@ -86,8 +88,7 @@ def plot_pred_target(tensors, savedir, cntr, cntr_max, conf, unscale=True):
     return cntr
 
 def plot_clusterings(
-    hits, initial_labels, pred_labels, true_labels, saveloc, conf,
-    baseline_labels=None, target_labels=None
+    hits, initial_labels, pred_labels, true_labels, saveloc, conf, view, target_labels=None
 ):
     random.seed(0)
     def random_rgb():
@@ -97,7 +98,7 @@ def plot_clusterings(
         x = hit.x
         z = hit.z
         x_width = hit.x_width
-        z_width = get_pitch(conf.plot_params["view"])
+        z_width = get_pitch(view, conf.detector)
         patch_corner = (x - (x_width / 2), z - (z_width / 2))
         if special:
             c = "r"
@@ -110,12 +111,10 @@ def plot_clusterings(
             )
         )
 
-    if baseline_labels is None and target_labels is None:
+    if target_labels is None:
         fig, ax = plt.subplots(1, 3, figsize=(14, 4))
-    elif baseline_labels is None or target_labels is None:
-        fig, ax = plt.subplots(1, 4, figsize=(18, 4))
     else:
-        fig, ax = plt.subplots(1, 5, figsize=(22, 4))
+        fig, ax = plt.subplots(1, 4, figsize=(22, 4))
 
     cluster_size = defaultdict(int)
     for label in initial_labels:
@@ -136,7 +135,7 @@ def plot_clusterings(
     ax[0].set_ylim(z_low, z_high)
     ax[0].set_xlabel("x")
     ax[0].set_ylabel("z")
-    ax[0].set_title(f"Initial Clusters ({len(cs)}) (view {conf.plot_params['view']})")
+    ax[0].set_title(f"Initial Clusters ({len(cs)}) (view {view})")
 
     cs = { label : random_rgb() for label in set(pred_labels) }
     for hit, label in zip(hits, pred_labels):
@@ -146,20 +145,18 @@ def plot_clusterings(
     ax[1].set_ylim(z_low, z_high)
     ax[1].set_xlabel("x")
     ax[1].set_ylabel("z")
-    ax[1].set_title(f"Pred Clusters ({len(cs)}) (view {conf.plot_params['view']})")
-
+    ax[1].set_title(f"Pred Clusters ({len(cs)}) (view {view})")
 
     cs = { label : random_rgb() for label in set(true_labels) }
     for hit, label in zip(hits, true_labels):
         c = cs[label]
-        draw_hit(hit, ax[2], c, special=(label == -1))
+        draw_hit(hit, ax[2], c, special=(label < 0))
     ax[2].set_xlim(x_low, x_high)
     ax[2].set_ylim(z_low, z_high)
     ax[2].set_xlabel("x")
     ax[2].set_ylabel("z")
-    ax[2].set_title(f"True Clusters ({len(set(cs) - {-1})}) (view {conf.plot_params['view']})")
+    ax[2].set_title(f"True Clusters ({len(set(cs) - {-1})}) (view {view})")
 
-    i_baseline = 3
     if target_labels is not None:
         cs = { label : random_rgb() for label in set(target_labels) }
         for hit, label in zip(hits, target_labels):
@@ -170,20 +167,6 @@ def plot_clusterings(
         ax[3].set_xlabel("x")
         ax[3].set_ylabel("z")
         ax[3].set_title(f"Target Clusters ({len(cs)}) (view {conf.plot_params['view']})")
-        i_baseline += 1
-
-    if baseline_labels is not None:
-        cs = { label : random_rgb() for label in set(baseline_labels) }
-        for hit, label in zip(hits, baseline_labels):
-            c = cs[label]
-            draw_hit(hit, ax[i_baseline], c)
-        ax[i_baseline].set_xlim(x_low, x_high)
-        ax[i_baseline].set_ylim(z_low, z_high)
-        ax[i_baseline].set_xlabel("x")
-        ax[i_baseline].set_ylabel("z")
-        ax[i_baseline].set_title(
-            f"Baseline Reco Clusters ({len(cs)}) (view {conf.plot_params['view']})"
-        )
 
     fig.tight_layout()
 
@@ -246,7 +229,7 @@ def plot_clusters(hits, hit_labels, saveloc, title="", graph=None, clusters=None
         x = hit.x
         z = hit.z
         x_width = hit.x_width
-        z_width = get_pitch(6)
+        z_width = get_pitch(6, "duneFDHD1x2x6")
         patch_corner = (x - (x_width / 2), z - (z_width / 2))
         if special:
             c = "r"
@@ -313,7 +296,7 @@ def make_2d_plot(
     plt.close()
 
 def make_1d_plot(arr, xlabel, ylabel, n_bins, range_bins, savepath):
-    fig, ax = plt.subplots(1, 1, layout="compressed", figsize=(7, 6))
+    _, ax = plt.subplots(1, 1, layout="compressed", figsize=(7, 6))
     ax.hist(arr, bins=n_bins, range=range_bins, histtype="step")
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
@@ -323,14 +306,6 @@ def make_1d_plot(arr, xlabel, ylabel, n_bins, range_bins, savepath):
 """ End - plotting helpers """
 
 """ Start - feature helpers """
-
-SCALING_FACTORS = { # From pandora's 1x2x6 FD HD detector boundaries
-    "polar_r" : (
-        1 / math.sqrt((362.622 - -362.622)**2 + (1393.46 - -0.876221)**2 + (603.924 - -603.924)**2)
-    ),
-    "cartesian_x" : 1 / (362.622 - -362.622),
-    "cartesian_z" : 1 / (1393.46 - -0.876221)
-}
 
 def scale_cluster_tensor_inplace(t, hit_scaling_factors, hit_log_transforms):
     for idx, scaling_type in hit_scaling_factors.items():
@@ -491,26 +466,22 @@ def gen_single_aug(
                 aug_tier_idx
             )
 
-    # Old and slow :(
-    # new_sim = torch.zeros(len(new_clusters), len(new_clusters), dtype=torch.float32)
-    # for i_cluster_a, (cluster_a, mc_id_cnts_a) in enumerate(zip(new_clusters, new_mc_id_cnts)):
-    #     for i_cluster_b, (cluster_b, mc_id_cnts_b) in enumerate(zip(new_clusters, new_mc_id_cnts)):
-    #         sim = 0
-    #         for mc_id, mc_cnt_a in mc_id_cnts_a.items():
-    #             if mc_id == -1 or mc_id not in mc_id_cnts_b:
-    #                 continue
-    #             sim += (mc_cnt_a / cluster_a.size(0)) * (mc_id_cnts_b[mc_id] / cluster_b.size(0))
-    #         new_sim[i_cluster_a][i_cluster_b] = sim
-
     t_mc_cnt = torch.zeros(len(new_clusters), len(uniq_mc_ids), dtype=torch.float32)
     mc_id_to_idx = { mc_id : idx for mc_id, idx in zip(uniq_mc_ids, range(len(uniq_mc_ids))) }
+    valid_mc_ids_denom = True
     for i, cnts in enumerate(new_mc_id_cnts):
         for mc_id, cnt in cnts.items():
-            if mc_id != -1:
-                t_mc_cnt[i, mc_id_to_idx[mc_id]] = cnt
-    t_cluster_sizes = torch.tensor(
-        [ t_cluster.size(0) for t_cluster in new_clusters ], dtype=torch.float32
-    )
+            if mc_id < 0:
+                if mc_id == -2:
+                    valid_mc_ids_denom = False
+                continue
+            t_mc_cnt[i, mc_id_to_idx[mc_id]] = cnt
+    if valid_mc_ids_denom:
+        t_cluster_sizes = torch.clamp(t_mc_cnt.sum(dim=1), min=1.0)
+    else:
+        t_cluster_sizes = torch.tensor(
+            [ t_cluster.size(0) for t_cluster in new_clusters ], dtype=torch.float32
+        )
     t_mc_purities = t_mc_cnt / t_cluster_sizes[:, None]
     new_sim = t_mc_purities @ t_mc_purities.T
 
@@ -522,7 +493,7 @@ def gen_single_aug(
 
 """ End - Iterative augmentation helpers """
 
-""" Start - misc helpers """
+""" Start - detector info helpers """
 
 def get_view(view, t_hit):
     if view < 0: 
@@ -540,12 +511,8 @@ def get_view(view, t_hit):
         raise ValueError(f"Failed to infer view from hit tensor {t_hit}")
     return view
 
-def get_pitch(view):
-    if view == 4 or 5:
-        return 0.4667
-    if view == 6:
-        return 0.479
-    raise ValueError(f"Invalid view: {view}")
+def get_pitch(view, detector):
+    return PITCHES[detector][view]
 
 def get_view_str(view):
     if view == 4:
@@ -555,6 +522,10 @@ def get_view_str(view):
     if view == 6:
         return "W"
     raise ValueError(f"Invalid view: {view}")
+
+""" End - detector info helpers """
+
+""" Start - misc helpers """
 
 def setup_logging():
     cyan="\033[0;36m"#]
@@ -572,7 +543,9 @@ def setup_logging():
     def get_handler(level, colour):
         h = logging.StreamHandler(sys.stdout)
         h.setLevel(level)
-        f = logging.Formatter(f"{colour}[%(asctime)s - %(levelname)s - %(module)s]{colour_reset} %(message)s")
+        f = logging.Formatter(
+            f"{colour}[%(asctime)s - %(levelname)s - %(module)s]{colour_reset} %(message)s"
+        )
         h.setFormatter(f)
         h.addFilter(MyFilter(level))
         return h

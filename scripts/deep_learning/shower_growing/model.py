@@ -66,7 +66,6 @@ class MAB(nn.Module):
             attn_out
         )
         O = self.ln0(O)
-        # O = O + nn.functional.relu(self.fc_o(O))
         O = O + nn.functional.leaky_relu(self.fc_o(O))
         O = self.ln1(O)
 
@@ -166,21 +165,6 @@ class SetTransformer(nn.Module):
 
         return self.dec_fc(out)
 
-class DotProductWithTemp(nn.Module):
-    def __init__(self, init_temp=1.0):
-        super().__init__()
-
-        self.temperature = nn.Parameter(torch.tensor(init_temp))
-
-    def forward(self, X):
-        sim = torch.bmm(X, X.transpose(1, 2))
-
-        sim = sim * torch.exp(self.temperature)
-
-        sim = torch.sigmoid(sim)
-
-        return sim
-
 class PairwiseMLPSimilarity(nn.Module):
     def __init__(self, embd_dim, dim_hidden=128):
         super().__init__()
@@ -244,7 +228,7 @@ class PairwiseMLPSimilarityLoop(PairwiseMLPSimilarity):
 
         for b in range(B):
             for i in range(N):
-                sim[b, i, i] = self.mlp_self_sim(X[i, i, :]).squeeze(-1)
+                sim[b, i, i] = self.mlp_self_sim(X[b, i, :]).squeeze(-1)
 
             for i in range(N):
                 for j in range(i + 1, N):
@@ -563,7 +547,7 @@ class ClusterMergeNet(ModelBase):
                 self.lr_scheduler.load_state_dict(checkpoint["lr_scheduler_state_dict"])
                 logger.info(f"Also loaded LR scheduler weights")
             self.training_start_epoch = round(checkpoint["epoch"])
-            if abs(checkpoint["epoch"] - self.training_start_epoch) > 1e6:
+            if abs(checkpoint["epoch"] - self.training_start_epoch) > 1e-6:
                 logger.warning(
                     "Rounded the continue training checkpoint epoch: "
                     f"{checkpoint['epoch']} -> {self.training_start_epoch}"

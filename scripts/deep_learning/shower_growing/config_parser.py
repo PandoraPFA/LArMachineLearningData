@@ -7,7 +7,9 @@ import logging; logger = logging.getLogger("the_logger")
 
 import yaml
 
-""" Start - config parser for cluster similarity prediciton """
+from constants import DETECTORS
+
+""" Start - config parser for cluster similarity predictions """
 
 COMMON_DEFAULTS={
     "device" : "cuda:0",
@@ -23,7 +25,8 @@ COMMON_DEFAULTS={
     "plot_params" : { },
     "save_best_weights" : False,
     "save_latest_epoch_weights" : False,
-    "continue_training_from_weights" : None
+    "continue_training_from_weights" : None,
+    "detector" : "duneFDHD1x2x6"
 }
 
 COMMON_MANDATORY_FIELDS={
@@ -89,8 +92,9 @@ CLUSTER_SIM_DEFAULTS=COMMON_DEFAULTS | {
         "iterative_augs" : False,
         "aug_sim_threshold" : 0.5,
         "aug_freq_epoch" : 1,
+        "aug_max_tier" : None,
         "aug_warmup_epoch" : 0,
-        "aug_max_n_jobs" : 0,
+        "aug_max_n_jobs" : 1,
         "aug_fixed_epoch_len": False,
         "aug_proba": None
     }
@@ -98,7 +102,7 @@ CLUSTER_SIM_DEFAULTS=COMMON_DEFAULTS | {
 
 CLUSTER_SIM_MANDATORY_FIELDS=COMMON_MANDATORY_FIELDS | set()
 
-def get_config(conf_file, overwrite_dict={}, test=False):
+def get_config(conf_file, overwrite_dict=None, test=False):
     logger.info(f"Reading conf from {conf_file}")
 
     conf_dict = _parse_yaml(
@@ -118,12 +122,14 @@ def get_config(conf_file, overwrite_dict={}, test=False):
     if not conf_dict["hit_feat_add_cardinality"] and not conf_dict["hit_feat_add_aug_tier"]:
         conf_dict["hit_feat_add_at_epoch"] = None
 
+    assert conf_dict["detector"] in DETECTORS, f"Invalid detector {conf_dict['detector']}"
+
     conf_namedtuple = namedtuple("conf", conf_dict)
     conf = conf_namedtuple(**conf_dict)
 
     return conf
 
-""" End - config parser for cluster similarity prediction """
+""" End - config parser for cluster similarity and optimal clustering param predictions """
 
 """ Start - helpers """
 
@@ -144,12 +150,13 @@ def _parse_yaml(conf_file, mandatory_fields, defaults, overwrite_dict):
     for option in set(defaults.keys()) - set(conf_dict.keys()):
         conf_dict[option] = defaults[option]
 
-    for field, val in overwrite_dict.items():
-        if isinstance(field, tuple):
-            assert len(field) == 2
-            conf_dict[field[0]][field[1]] = val
-        else:
-            conf_dict[field] = val
+    if overwrite_dict is not None:
+        for field, val in overwrite_dict.items():
+            if isinstance(field, tuple):
+                assert len(field) == 2
+                conf_dict[field[0]][field[1]] = val
+            else:
+                conf_dict[field] = val
 
     return conf_dict
 
@@ -172,20 +179,20 @@ def _prep_checkpoints_dir(conf_dict, conf_file):
     ):
         n += 1
     conf_dict["loss_file"] = os.path.join(conf_dict["checkpoint_dir"], f"losses_{n}.txt")
-    logger.info(f"loss file will be {os.path.basename(conf_dict["loss_file"])}")
+    logger.info(f"loss file will be {os.path.basename(conf_dict['loss_file'])}")
 
     conf_dict["val_dir"] = os.path.join(conf_dict["checkpoint_dir"], f"val_{n}/")
     conf_dict["val_dir_latest"] = os.path.join(conf_dict["val_dir"], "latest/")
     conf_dict["val_dir_best"] = os.path.join(conf_dict["val_dir"], "best/")
-    logger.info(f"val predictions dir will be {conf_dict["val_dir"]}")
+    logger.info(f"val predictions dir will be {conf_dict['val_dir']}")
 
     conf_dict["train_dir"] = os.path.join(conf_dict["checkpoint_dir"], f"train_{n}/")
     conf_dict["train_dir_latest"] = os.path.join(conf_dict["train_dir"], "latest/")
-    logger.info(f"train predictions dir will be {conf_dict["train_dir"]}")
+    logger.info(f"train predictions dir will be {conf_dict['train_dir']}")
 
     if conf_dict["save_best_weights"] or conf_dict["save_latest_epoch_weights"]:
         conf_dict["weights_dir"] = os.path.join(conf_dict["checkpoint_dir"], f"weights_{n}/")
-        logger.info(f"checkpointed weights dir will be {conf_dict["weights_dir"]}")
+        logger.info(f"checkpointed weights dir will be {conf_dict['weights_dir']}")
     if conf_dict["save_best_weights"]:
         conf_dict["best_weights_filepath"] = os.path.join(
             conf_dict["weights_dir"], "best_weights.pt"

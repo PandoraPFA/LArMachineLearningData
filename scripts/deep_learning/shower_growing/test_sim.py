@@ -68,8 +68,10 @@ def main(args):
     test_dirs = { 0 : test_dir, 1 : os.path.join(test_dir, "1"), 2 : os.path.join(test_dir, "2+") }
     prep_test_dir(test_dirs, args.iterative_augs)
 
-    y_sim_preds = { 0 : defaultdict(list), 1 : defaultdict(list), 2 : defaultdict(list) }
-    y_sim_targets = { 0 : defaultdict(list), 1 : defaultdict(list), 2 : defaultdict(list) }
+    y_cross_sim_preds = { 0 : defaultdict(list), 1 : defaultdict(list), 2 : defaultdict(list) }
+    y_cross_sim_targets = { 0 : defaultdict(list), 1 : defaultdict(list), 2 : defaultdict(list) }
+    y_self_sim_preds = { 0 : defaultdict(list), 1 : defaultdict(list), 2 : defaultdict(list) }
+    y_self_sim_targets = { 0 : defaultdict(list), 1 : defaultdict(list), 2 : defaultdict(list) }
     n_events = { 0 : defaultdict(int), 1 : defaultdict(int), 2 : defaultdict(int) }
     losses = []
     test_plot_cntr = { 0 : 0, 1 : 0, 2 : 0 }
@@ -92,12 +94,21 @@ def main(args):
             ts = model.get_current_tensors()
             t_sim_pred, t_sim_target = ts["ev_t_sim"][0][0], ts["ev_t_sim_target"][0][0]
             N = t_sim_pred.size(0)
+
             idx_i, idx_j = torch.triu_indices(N, N, offset=1)
-            y_sim_preds[i][view].append(
+            y_cross_sim_preds[i][view].append(
                 t_sim_pred[idx_i, idx_j].float().detach().cpu().numpy().ravel()
             )
-            y_sim_targets[i][view].append(
+            y_cross_sim_targets[i][view].append(
                 t_sim_target[idx_i, idx_j].float().detach().cpu().numpy().ravel()
+            )
+
+            idx_diag = torch.arange(N)
+            y_self_sim_preds[i][view].append(
+                t_sim_pred[idx_diag, idx_diag].float().detach().cpu().numpy().ravel()
+            )
+            y_self_sim_targets[i][view].append(
+                t_sim_target[idx_diag, idx_diag].float().detach().cpu().numpy().ravel()
             )
 
             if test_plot_cntr[i] < N_TEST_PLOTS:
@@ -143,23 +154,58 @@ def main(args):
     loss = np.mean(losses)
     logger.info(f"Mean loss: {loss:.6f}")
 
+    print(f"Metrics for cross-similarities:")
     for i in (0, 1, 2):
-        y_sim_pred = { view : np.concatenate(y) for view, y in y_sim_preds[i].items() }
-        y_sim_target = { view : np.concatenate(y) for view, y in y_sim_targets[i].items() }
-        y_adj_pred = {
-            view : (y >= args.adjacency_threshold).astype(int) for view, y in y_sim_pred.items()
+        y_cross_sim_pred = {
+            view : np.concatenate(y) for view, y in y_cross_sim_preds[i].items()
         }
-        y_adj_target = {
-            view : (y >= args.adjacency_threshold).astype(int) for view, y in y_sim_target.items()
+        y_cross_sim_target = {
+            view : np.concatenate(y) for view, y in y_cross_sim_targets[i].items()
+        }
+        y_cross_adj_pred = {
+            view : (y >= args.adjacency_threshold).astype(int)
+            for view, y in y_cross_sim_pred.items()
+        }
+        y_cross_adj_target = {
+            view : (y >= args.adjacency_threshold).astype(int)
+            for view, y in y_cross_sim_target.items()
         }
 
-        metrics_file = os.path.join(test_dirs[i], "metrics_test_sim.txt")
+        metrics_file = os.path.join(test_dirs[i], "metrics_cross_test_sim.txt")
         if os.path.exists(metrics_file):
             os.remove(metrics_file)
-        for view in y_sim_pred:
+        for view in y_cross_sim_pred:
             report_metrics(
-                y_sim_pred[view], y_sim_target[view],
-                y_adj_pred[view], y_adj_target[view],
+                y_cross_sim_pred[view], y_cross_sim_target[view],
+                y_cross_adj_pred[view], y_cross_adj_target[view],
+                n_events[i][view],
+                view, metrics_file
+            )
+
+    print(f"Metrics for self-similarities:")
+    for i in (0, 1, 2):
+        y_self_sim_pred = {
+            view : np.concatenate(y) for view, y in y_self_sim_preds[i].items()
+        }
+        y_self_sim_target = {
+            view : np.concatenate(y) for view, y in y_self_sim_targets[i].items()
+        }
+        y_self_adj_pred = {
+            view : (y >= args.adjacency_threshold).astype(int)
+            for view, y in y_self_sim_pred.items()
+        }
+        y_self_adj_target = {
+            view : (y >= args.adjacency_threshold).astype(int)
+            for view, y in y_self_sim_target.items()
+        }
+
+        metrics_file = os.path.join(test_dirs[i], "metrics_self_test_sim.txt")
+        if os.path.exists(metrics_file):
+            os.remove(metrics_file)
+        for view in y_self_sim_pred:
+            report_metrics(
+                y_self_sim_pred[view], y_self_sim_target[view],
+                y_self_adj_pred[view], y_self_adj_target[view],
                 n_events[i][view],
                 view, metrics_file
             )

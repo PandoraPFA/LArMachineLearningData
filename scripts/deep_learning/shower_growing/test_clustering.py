@@ -23,7 +23,7 @@ from sklearn.metrics.cluster import adjusted_rand_score, contingency_matrix
 from config_parser import get_config
 from model import ClusterMergeNet
 from dataset import CollateClusters
-from data.read_cluster import read_events, make_cluster_data, get_similarity_matrix
+from data.read_cluster import read_events, make_cluster_data, get_similarity_matrix, balance_events
 from helpers import (
     setup_logging,
     get_gpu_usage,
@@ -56,6 +56,8 @@ def main(args):
     view = VIEW_CONVERSION[args.view]
 
     conf = get_config(args.config_file, test=True)
+    conf.net_inter_cluster_sim_params["use_chunked_implementation"] = True
+    conf.net_inter_cluster_sim_params["chunk_size"] = 2**21
 
     model = prep_model(conf, args.weights_file)
 
@@ -73,14 +75,10 @@ def main(args):
     hit_pred_true_aris, hit_pred_true_purities, hit_pred_true_completenesses = [], [], []
     hit_pred_target_aris = []
 
-    n_hits_baseline = []
-    hit_baseline_pred_true_aris = []
-    hit_baseline_pred_true_purities, hit_baseline_pred_true_completenesses = [], []
-    if args.baseline_root_file is not None:
-        events_baseline = read_events(uproot.open(args.baseline_root_file)[args.root_treename])#[13:14]
-
     test_plot_cntr = 0
     events = read_events(uproot.open(args.root_file)[args.root_treename], n_events=args.max_events)#[13:14]
+    if args.balance_events:
+        events = balance_events(events)
     for i_event, event in tqdm(
         enumerate(events), desc="Processing test events...", total=len(events)
     ):
@@ -104,7 +102,9 @@ def main(args):
         hit_labels_true = get_true_clusterings(clusters)
         hit_labels_perfect = get_perfect_clusterings(clusters)
 
-        metrics_mask = (hit_labels_true != -1) # Hits with missing MC info
+        metrics_mask = (hit_labels_true >= 0) # Hits with missing MC info
+        if not metrics_mask.sum():
+            continue
         n_hits.append(int(metrics_mask.sum()))
 
         ret = calc_metrics(hit_labels_true[metrics_mask], hit_labels_target[metrics_mask])
@@ -128,26 +128,6 @@ def main(args):
             )
         )
 
-        if args.baseline_root_file is not None:
-            clusters_baseline = events_baseline[i_event].view_clusters[view]
-            for cluster in clusters_baseline:
-                cluster.calc_main_mc()
-            hit_labels_baseline_pred = np.array(
-                [ label for label, cluster in enumerate(clusters_baseline) for _ in cluster.hits ]
-            )
-            hit_labels_baseline_true = get_true_clusterings(clusters_baseline)
-            metrics_mask = (hit_labels_baseline_true != -1)
-            if metrics_mask.sum() == 0: # No 2D hits made it to 3D, results in no 2D clusters
-                hit_labels_baseline_pred = None
-                continue
-            n_hits_baseline.append(int(metrics_mask.sum()))
-            ret = calc_metrics(
-                hit_labels_baseline_true[metrics_mask], hit_labels_baseline_pred[metrics_mask]
-            )
-            hit_baseline_pred_true_aris.append(ret[0])
-            hit_baseline_pred_true_purities.append(ret[1])
-            hit_baseline_pred_true_completenesses.append(ret[2])
-
         if test_plot_cntr < N_TEST_PLOTS:
             test_plot_cntr += 1
 
@@ -159,9 +139,7 @@ def main(args):
                     hit_labels_true,
                     None,
                     conf,
-                    baseline_labels=(
-                        hit_labels_baseline_pred if args.baseline_root_file is not None else None
-                    ),
+                    clusters[0].view,
                     # target_labels=hit_labels_target
                     target_labels=None 
                 )
@@ -213,26 +191,6 @@ def main(args):
     )
     logger.info(f"Pred-Target Hit ARI: {np.mean(hit_pred_target_aris):.4f}")
 
-    if args.baseline_root_file is not None:
-        n_hits_baseline_mask = (np.array(n_hits_baseline) > N_HITS_THRES)
-        hit_baseline_pred_true_aris = (
-            np.array(hit_baseline_pred_true_aris)[n_hits_baseline_mask]
-        )
-        hit_baseline_pred_true_purities = (
-            np.array(hit_baseline_pred_true_purities)[n_hits_baseline_mask]
-        )
-        hit_baseline_pred_true_completenesses = (
-            np.array(hit_baseline_pred_true_completenesses)[n_hits_baseline_mask]
-        )
-
-        logger.info(f"{n_hits_baseline_mask.sum()} total events for baseline")
-        logger.info(
-            "Baseline Reco Clusters:\n"
-            f" - ARI          {np.mean(hit_baseline_pred_true_aris):.4f}\n"
-            f" - Purity       {np.mean(hit_baseline_pred_true_purities):.4f}\n"
-            f" - Completeness {np.mean(hit_baseline_pred_true_completenesses):.4f}"
-        )
-
     metrics_file = os.path.join(test_dir, "metrics_test_clustering.txt")
     with open(metrics_file, "w") as f:
         f.write(f"n events {n_hits_mask.sum()}\n")
@@ -247,26 +205,15 @@ def main(args):
         f.write(f"pred completeness {np.mean(hit_pred_true_completenesses):.4f}\n")
         f.write(f"pred-target ari {np.mean(hit_pred_target_aris):.4f}\n")
 
-        if args.baseline_root_file is not None:
-            f.write(f"baseline reco ari {np.mean(hit_baseline_pred_true_aris):.4f}\n")
-            f.write(f"baseline reco purity {np.mean(hit_baseline_pred_true_purities):.4f}\n")
-            f.write(f"baseline reco completeness {np.mean(hit_baseline_pred_true_completenesses):.4f}\n")
-
     with PdfPages(os.path.join(test_dir, "metrics_plots.pdf")) as pdf:
         make_metrics_plot(
-            hit_pred_true_aris,
-            hit_target_true_aris,
-            hit_perfect_true_aris, 
-            hit_baseline_pred_true_aris,
+            hit_pred_true_aris, hit_target_true_aris, hit_perfect_true_aris,
             xlabel="ARI"
         )
         pdf.savefig()
         plt.close()
         make_metrics_plot(
-            hit_pred_true_purities,
-            hit_target_true_purities,
-            hit_perfect_true_purities, 
-            hit_baseline_pred_true_purities,
+            hit_pred_true_purities, hit_target_true_purities, hit_perfect_true_purities, 
             xlabel="Purity"
         )
         pdf.savefig()
@@ -275,32 +222,12 @@ def main(args):
             hit_pred_true_completenesses,
             hit_target_true_completenesses,
             hit_perfect_true_completenesses, 
-            hit_baseline_pred_true_completenesses,
             xlabel="Completeness"
         )
         pdf.savefig()
         plt.close()
 
-        if args.baseline_root_file is not None:
-            make_metrics_plot(
-                hit_pred_true_aris, [], [], hit_baseline_pred_true_aris, xlabel="ARI"
-            )
-            pdf.savefig()
-            plt.close()
-            make_metrics_plot(
-                hit_pred_true_purities, [], [], hit_baseline_pred_true_purities,
-                xlabel="Purity"
-            )
-            pdf.savefig()
-            plt.close()
-            make_metrics_plot(
-                hit_pred_true_completenesses, [], [], hit_baseline_pred_true_completenesses,
-                xlabel="Completeness"
-            )
-            pdf.savefig()
-            plt.close()
-
-def make_metrics_plot(metrics_pred, metrics_target, metrics_perfect, metrics_baseline, xlabel=""):
+def make_metrics_plot(metrics_pred, metrics_target, metrics_perfect, xlabel=""):
     fig, ax = plt.subplots(1, 1, figsize=(7,5))
 
     pred_hist, bins = np.histogram(metrics_pred, bins=100, range=(0,1), density=True)
@@ -319,10 +246,6 @@ def make_metrics_plot(metrics_pred, metrics_target, metrics_perfect, metrics_bas
             weights=perfect_hist,
             histtype="step", label="Perfect", linestyle="dashed"
         )
-
-    if len(metrics_baseline):
-        baseline_hist, _ = np.histogram(metrics_baseline, bins=100, range=(0,1), density=True)
-        ax.hist(x, bins=100, range=(0,1), weights=baseline_hist, histtype="step", label="Baseline")
 
     ax.set_xlabel(xlabel, loc="right")
     ax.set_ylabel("Density", loc="top")
@@ -527,7 +450,7 @@ def _make_input_data(
 ):
     t_clusters = []
     for cluster in clusters:
-        cluster_data = make_cluster_data(cluster, event, view, hit_feature_preset)
+        cluster_data = make_cluster_data(cluster, event, view, hit_feature_preset, conf.detector)
         t_clusters.append(torch.tensor(cluster_data, dtype=torch.float32))
     if conf.hit_feat_add_cardinality:
         t_clusters = add_cardinality_feature(t_clusters)
@@ -586,7 +509,7 @@ def parse_cli():
 
     parser.add_argument("--view", default="W", choices=["U", "V", "W"])
     parser.add_argument(
-        "--hit_feature_preset", type=int, default=1, choices=range(1, 9),
+        "--hit_feature_preset", type=int, default=1, choices=range(1, 11),
         help=(
             "1 - Cartesian | "
             "2 - Cartesian w/ cheat | "
@@ -594,8 +517,10 @@ def parse_cli():
             "4 - Polar | "
             "5 - Polar w/ summary | "
             "6 - Cartesian w/ wire pitch | "
-            "7 - Cartesian + Polar w/ wire pitch |"
-            "8 - Cartesian + Polar w/ wire pitch + View one-hot"
+            "7 - Cartesian + Polar w/ wire pitch | "
+            "8 - Preset 7 + View one-hot | "
+            "9 - Preset 8 + APA1 one-hot | "
+            "10 - Preset 8 w/o X gap distance"
         )
     )
     parser.add_argument(
@@ -639,10 +564,7 @@ def parse_cli():
     parser.add_argument("--max_events", type=int, default=None)
     parser.add_argument("--batch_mode", action="store_true")
     parser.add_argument("--test_dir_suffix", type=str, default="")
-    parser.add_argument(
-        "--baseline_root_file", type=str, default=None,
-        help="Training ROOT file with clusters from baseline pandora clustering"
-    )
+    parser.add_argument("--balance_events", action="store_true")
 
     args = parser.parse_args()
 
