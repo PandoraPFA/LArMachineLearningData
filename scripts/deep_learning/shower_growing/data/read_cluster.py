@@ -370,7 +370,6 @@ def parse_cli():
     parser.add_argument("filename", type=str)
     parser.add_argument("treename", type=str)
 
-    parser.add_argument("--cheated_feature", action="store_true")
     parser.add_argument(
         "--hit_feature_preset", type=int, default=1, choices=range(1, 11),
         help=(
@@ -388,7 +387,7 @@ def parse_cli():
     )
     parser.add_argument("--save_mc_cnts", action="store_true")
     parser.add_argument("--missing_mc_ids_in_denom", action="store_true")
-    parser.add_argument("--balance_events", action="store_true")
+   eparser.add_argument("--balance_events", action="store_true")
 
     parser.add_argument("--n_jobs", type=int, default=4)
 
