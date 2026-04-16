@@ -22,7 +22,7 @@ pip install torch numpy joblib leidenalg matplotlib networkx psutil igraph sciki
 
 #### Exporting Training Data
 
-Use the `LArDLTwoDShowerGrowing` in training mode over some simulation, preferably with roll-up turned off. I would recommend a sample of around 300k events. Hadd all the outputted training data ROOT files together.
+Use the `LArDLTwoDShowerGrowing` in training mode over some simulation, preferably with roll-up turned off. I would recommend a sample of around 450k (150k events for the recommended mixed view training) . Hadd all the outputted training data ROOT files together.
 
 Take a look in `constants.py` to see if your detector is there. If not, you will need to add it to `DETECTORS` and provide scaling factors and pitches. To find the scaling factors you should use check inside your hadd'ed ROOT training data file (assuming you used the tree name "clusters")::
 ```
