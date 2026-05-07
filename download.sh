@@ -106,6 +106,13 @@ then
     download "7SOK7TxRqw6YUYM" "PandoraNet_Hierarchy_DUNEFD_HD_TS_Edge_v014_15_00.pt"
     download "roB3RbWOUW7Qa4N" "PandoraNet_Hierarchy_DUNEFD_HD_TT_Class_v014_15_00.pt"
     download "L0ktaA5faHZBZNK" "PandoraNet_Hierarchy_DUNEFD_HD_TT_Edge_v014_15_00.pt"
+
+    download "lfnGRndqKcpYo3Z" "PandoraNet_ShowerGrowing_DUNEFD_HD_Attn_v05_00_00.pt"
+    download "fXVLcSoh5s6RdDW" "PandoraNet_ShowerGrowing_DUNEFD_HD_Encoder_v05_00_00.pt"
+    download "Wz6D2ccdilPqGym" "PandoraNet_ShowerGrowing_DUNEFD_HD_Sim_v05_00_00.pt"
+    download "I69c6Pc78Rg7noj" "PandoraNet_ShowerGrowing_DUNEFD_VD_Attn_v05_00_00.pt"
+    download "mcPqbgBwBjsl2qo" "PandoraNet_ShowerGrowing_DUNEFD_VD_Encoder_v05_00_00.pt"
+    download "5KkZhMjnwm49tvO" "PandoraNet_ShowerGrowing_DUNEFD_VD_Sim_v05_00_00.pt"
   fi
 
   if [[ "$2" == "atmos" ]]
@@ -116,6 +123,13 @@ then
     download "nKuPKh6vZwlODFJ" "PandoraNet_Vertex_DUNEFD_HD_Atmos_2_U_v04_03_00.pt"
     download "bM7ZRlCRabeRbOu" "PandoraNet_Vertex_DUNEFD_HD_Atmos_2_V_v04_03_00.pt"
     download "QNZfK3YdG2Hebxn" "PandoraNet_Vertex_DUNEFD_HD_Atmos_2_W_v04_03_00.pt"
+
+    download "lfnGRndqKcpYo3Z" "PandoraNet_ShowerGrowing_DUNEFD_HD_Attn_v05_00_00.pt"
+    download "fXVLcSoh5s6RdDW" "PandoraNet_ShowerGrowing_DUNEFD_HD_Encoder_v05_00_00.pt"
+    download "Wz6D2ccdilPqGym" "PandoraNet_ShowerGrowing_DUNEFD_HD_Sim_v05_00_00.pt"
+    download "I69c6Pc78Rg7noj" "PandoraNet_ShowerGrowing_DUNEFD_VD_Attn_v05_00_00.pt"
+    download "mcPqbgBwBjsl2qo" "PandoraNet_ShowerGrowing_DUNEFD_VD_Encoder_v05_00_00.pt"
+    download "5KkZhMjnwm49tvO" "PandoraNet_ShowerGrowing_DUNEFD_VD_Sim_v05_00_00.pt"
   fi
 fi
 
